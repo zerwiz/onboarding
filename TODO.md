@@ -27,20 +27,28 @@
 - [x] Add toggleResourcesDropdown() JavaScript function
 - [x] Add closeResourcesDropdown() JavaScript function
 - [x] Add AI_Engineering_Cockpit_Assembly.pdf download
+- [x] Move Ticket System button next to Presentation/Dashboard buttons in header
+- [x] Add rotate-180 CSS class for dropdown chevron animation
+- [x] Add click-outside handler to close resources dropdown
+- [x] Add transition-transform CSS class for smooth animations
 
 ## In Progress
 
-- [ ] Create dedicated ticket system page with full documentation
-
-## Pending
-
-- [ ] Create ticket system explanation page (with YouTube video embed)
+- [ ] Create dedicated ticket system page with full documentation (ticket.html)
   - [ ] Add ticket_context skill documentation
   - [ ] Add ticket_executor skill documentation
   - [ ] Add ticket_manager skill documentation
   - [ ] Include ticket naming conventions and storage paths
-  - [ ] Add YouTube video embed placeholder
-  - [ ] Link to f-rr-d (förråd) centralized storage
+  - [ ] Add YouTube video embed (https://youtu.be/fKK1m-_bnuA)
+  - [ ] Link to f-rr-d (förråd) centralized storage - Swedish for "storage"
+  - [ ] Add GitHub-flavored markdown rendering for info/*.md files
+
+## Pending
+
+- [ ] Create markdown viewer component for Resources dropdown (rendered markdown like GitHub)
+- [ ] Make md files in dropdown render with proper formatting (tables, code blocks, headings)
+- [ ] Add keyboard navigation for dropdown (ESC to close, arrow keys)
+- [ ] Add deep linking support for ticket system page
 
 ## Research & Documentation
 
@@ -48,6 +56,7 @@
 - [ ] Create skills reference page with all ai-harness skills organized by package
 - [ ] Note: ticket_context, ticket_executor, ticket_manager skills are in wayofmono repo under packages/@aiengineeringharness/
 - [ ] opencode skills: https://github.com/Way-Of/wayofmono/tree/main/packages%2F%40aiengineeringharness%2Fopencode%2Fskills
+- [ ] f-rr-d = förråd = Swedish for "storage" (centralized thoughts repository)
 
 ## Architecture & Refactoring
 
@@ -58,3 +67,12 @@
 - [ ] Create shared layout/base template
 - [ ] Implement component loading system (ES modules or build step)
 - [ ] Migrate index.html to use modular structure
+- [ ] Create separate ticket.html page for ticket system documentation
+
+## Bug Fixes & Polish
+
+- [ ] Fix dropdown chevron rotation animation (add transition-transform class)
+- [ ] Ensure Resources dropdown closes on ESC key
+- [ ] Add proper markdown rendering for info pages in dropdown (marked.js or similar)
+- [ ] Test mobile responsiveness of new Ticket button
+- [ ] Verify presentation/dashboard mode transitions work smoothly

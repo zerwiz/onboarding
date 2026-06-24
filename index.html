@@ -60,6 +60,12 @@
         .glow-accent {
             box-shadow: 0 0 20px rgba(20, 184, 166, 0.15);
         }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        .transition-transform {
+            transition: transform 0.2s ease;
+        }
         #side-panel-column {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -144,13 +150,19 @@
                     </svg>
                 </button>
 
-                <!-- View mode buttons -->
+                <!-- View mode buttons + Ticket System -->
                 <div class="flex bg-zinc-950 p-1 rounded-lg border border-zinc-800">
                     <button id="view-presentation" class="px-3 py-1 rounded text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all" onclick="setViewMode('presentation')">
                         Presentation
                     </button>
                     <button id="view-dashboard" class="px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all" onclick="setViewMode('dashboard')">
                         Dashboard
+                    </button>
+                    <button id="view-tickets" class="px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-brand/10 transition-all flex items-center gap-1.5" onclick="showTicketPage()" title="Ticket System">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Tickets
                     </button>
                 </div>
 
@@ -1626,6 +1638,30 @@
             }
         }
 
+        // Resources Dropdown
+        function toggleResourcesDropdown() {
+            const menu = document.getElementById('resources-menu');
+            const chevron = document.getElementById('resources-chevron');
+            menu.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
+        }
+
+        function closeResourcesDropdown() {
+            const menu = document.getElementById('resources-menu');
+            const chevron = document.getElementById('resources-chevron');
+            menu.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+        }
+
+        // Ticket System Page Navigation
+        function showTicketPage() {
+            closeResourcesDropdown();
+            // Navigate to a ticket system page or show modal
+            // For now, show toast and could redirect to a dedicated page
+            showToast("Ticket System page - coming soon");
+            // Example: window.location.href = 'tickets.html';
+        }
+
         // Clipboard Copy Utility (execCommand fallback safe for iframes)
         function copyCommand(text, message = "Copied to clipboard!") {
             const textarea = document.createElement('textarea');
@@ -1662,6 +1698,18 @@
                 toast.classList.remove('translate-y-0', 'opacity-100');
             }, 3000);
         }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('resources-dropdown');
+            const menu = document.getElementById('resources-menu');
+            const btn = document.getElementById('resources-btn');
+            if (dropdown && menu && btn && !dropdown.contains(e.target)) {
+                menu.classList.add('hidden');
+                const chevron = document.getElementById('resources-chevron');
+                if (chevron) chevron.classList.remove('rotate-180');
+            }
+        });
     </script>
 </body>
 </html>

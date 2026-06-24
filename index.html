@@ -123,8 +123,9 @@
             </div>
 
             <!-- Global search and mode switchers -->
-            <div class="flex items-center gap-3 flex-wrap">
-                <div class="relative max-w-xs w-full">
+            <div class="flex items-center gap-3 flex-wrap md:justify-end w-full md:w-auto">
+                <!-- Search (mobile only) -->
+                <div class="relative max-w-xs w-full md:hidden">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-400">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -133,13 +134,72 @@
                     <input id="global-search" type="text" placeholder="Search guide/commands..." class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand focus:border-brand">
                 </div>
 
+                <!-- Desktop sidebar toggle -->
+                <button id="sidebar-toggle-desktop" class="hidden md:flex p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white" title="Toggle Sidebar" onclick="toggleSidebar()">
+                    <svg id="sidebar-open-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    </svg>
+                    <svg id="sidebar-close-icon" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M6 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                <!-- View mode buttons -->
                 <div class="flex bg-zinc-950 p-1 rounded-lg border border-zinc-800">
                     <button id="view-presentation" class="px-3 py-1 rounded text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all" onclick="setViewMode('presentation')">
                         Presentation
                     </button>
                     <button id="view-dashboard" class="px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all" onclick="setViewMode('dashboard')">
-                        Dashboard Mode
+                        Dashboard
                     </button>
+                </div>
+
+                <!-- Resources dropdown -->
+                <div class="relative" id="resources-dropdown">
+                    <button id="resources-btn" class="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white flex items-center gap-1.5" title="Resources" onclick="toggleResourcesDropdown()">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <span class="hidden sm:inline">Resources</span>
+                        <svg id="resources-chevron" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div id="resources-menu" class="hidden absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50">
+                        <div class="p-2 space-y-1">
+                            <a href="#" onclick="showTicketPage(); return false;" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round"round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Ticket System
+                            </a>
+                            <hr class="border-zinc-800 my-1">
+                            <a href="info/f-rr-d.md" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                </svg>
+                                f-rr-d (Centralized Thoughts)
+                            </a>
+                            <a href="info/wayofwork.md" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                                Way of Work
+                            </a>
+                            <a href="info/OptiCat.md" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                                OptiCat
+                            </a>
+                            <a href="info/wayofmono.md" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                                WayOfMono
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <button id="theme-toggle" class="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white" title="Toggle Theme" onclick="toggleTheme()">
@@ -181,7 +241,7 @@
         </div>
 
         <!-- Video Tutorial Section -->
-        <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 shadow-xl mb-6">
+        <div id="video-section" class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 shadow-xl mb-6">
             <div class="flex items-center gap-3 mb-4">
                 <div class="p-3 bg-brand/10 border border-brand/20 rounded-xl text-brand">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1515,6 +1575,8 @@
             const dashBtn = document.getElementById('view-dashboard');
             const mainCol = document.getElementById('main-content-column');
             const sideCol = document.getElementById('side-panel-column');
+            const videoSection = document.getElementById('video-section');
+            const repoLinksBar = document.getElementById('repo-links-bar');
 
             if (mode === 'presentation') {
                 presBtn.className = "px-3 py-1 rounded text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all";
@@ -1525,6 +1587,8 @@
                 closeMobileDrawer();
                 document.getElementById('completion-banner').classList.add('hidden');
                 document.getElementById('steps-grid').parentElement.parentElement.classList.add('hidden');
+                if (videoSection) videoSection.classList.add('hidden');
+                if (repoLinksBar) repoLinksBar.classList.add('hidden');
             } else {
                 dashBtn.className = "px-3 py-1 rounded text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all";
                 presBtn.className = "px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all";
@@ -1533,12 +1597,32 @@
                 sideCol.classList.remove('hidden', 'fixed-drawer', 'open');
                 document.getElementById('completion-banner').classList.remove('hidden');
                 document.getElementById('steps-grid').parentElement.parentElement.classList.remove('hidden');
+                if (videoSection) videoSection.classList.remove('hidden');
+                if (repoLinksBar) repoLinksBar.classList.remove('hidden');
                 
                 document.getElementById('tree-wow').classList.remove('hidden');
                 document.getElementById('tree-opticat').classList.remove('hidden');
                 document.getElementById('tree-wayofmono').classList.remove('hidden');
                 
                 showToast("Dashboard mode: full workspace view enabled.");
+            }
+        }
+
+        // Sidebar Toggle for Desktop
+        function toggleSidebar() {
+            const sideCol = document.getElementById('side-panel-column');
+            const openIcon = document.getElementById('sidebar-open-icon');
+            const closeIcon = document.getElementById('sidebar-close-icon');
+            const isOpen = !sideCol.classList.contains('hidden');
+
+            if (isOpen) {
+                sideCol.classList.add('hidden');
+                openIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            } else {
+                sideCol.classList.remove('hidden');
+                openIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
             }
         }
 

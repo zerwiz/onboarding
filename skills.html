@@ -449,7 +449,17 @@
                     <p><strong class="text-zinc-300">Codex</strong> — <code class="text-rose-400 font-mono text-xs">~/.codex/skills/</code> (65 skills)</p>
                 </div>
                 <div class="p-3 bg-zinc-950 border border-zinc-800 rounded-lg sm:col-span-2">
-                    <p><strong class="text-zinc-300">All skills share the same content</strong> — only directory naming conventions differ per tool. Run <code class="text-brand font-mono text-xs">ai-harness --tool=all --yes</code> to install all skills across all tools.</p>
+                    <p class="text-sm text-zinc-400 mb-3"><strong class="text-zinc-300">All skills share the same content</strong> — only directory naming conventions differ per tool.</p>
+                    <div class="space-y-2">
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-3 flex items-center justify-between gap-3">
+                            <code class="text-xs font-mono text-brand break-all">deno run --reload -A https://raw.githubusercontent.com/Way-Of/wayofmono/main/packages/@aiengineeringharness/install.ts --install-cli</code>
+                            <button onclick="copyCommand('deno run --reload -A https://raw.githubusercontent.com/Way-Of/wayofmono/main/packages/@aiengineeringharness/install.ts --install-cli', 'Reload command copied!')" class="shrink-0 text-xs text-brand hover:underline font-bold">Copy</button>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-3 flex items-center justify-between gap-3">
+                            <code class="text-xs font-mono text-brand break-all">ai-harness --tool=all --yes</code>
+                            <button onclick="copyCommand('ai-harness --tool=all --yes', 'Install command copied!')" class="shrink-0 text-xs text-brand hover:underline font-bold">Copy</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

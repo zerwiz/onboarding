@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket System — WayOfMono Onboarding</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#115e59',
+                            DEFAULT: '#14b8a6'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(20, 184, 166, 0.5);
+        }
+        .glow-accent {
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.15);
+        }
+    </style>
+</head>
+<body class="text-zinc-100 bg-zinc-950 min-h-screen flex flex-col overflow-x-hidden antialiased custom-scrollbar">
+
+    <!-- Markdown Viewer Modal -->
+    <div id="md-viewer" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b border-zinc-800">
+                <h3 id="md-viewer-title" class="text-sm font-bold text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+                    <span id="md-viewer-title-text">Document</span>
+                </h3>
+                <button onclick="closeMarkdownViewer()" class="p-1.5 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white transition-all">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="md-viewer-content" class="flex-1 overflow-y-auto p-6 custom-scrollbar prose prose-invert prose-sm max-w-none">
+                <div class="text-zinc-400 text-sm">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast System -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 bg-zinc-900 border border-brand-500/30 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm">
+        <div class="p-1 rounded-full bg-brand-500/20 text-brand-400">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        <span id="toast-message" class="text-sm font-medium">Copied!</span>
+    </div>
+
+    <!-- Top App Bar -->
+    <header class="border-b border-zinc-800/80 bg-zinc-900/60 backdrop-blur-md sticky top-0 z-40 px-4 py-3 sm:px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="p-2 bg-brand/10 border border-brand/20 rounded-xl text-brand hover:bg-brand/20 transition-all">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+                        WayOfMono Onboarding Center
+                        <button id="hamburger-btn" class="lg:hidden p-1.5 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white" title="Toggle Side Panel" onclick="toggleMobilePanel()">
+                            <svg id="hamburger-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                            <svg id="hamburger-close-icon" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </h1>
+                    <p class="text-xs text-zinc-400">Local GitHub Setup, WayOfMono, & Zed IDE Integration</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 flex-wrap md:justify-end w-full md:w-auto">
+                <div class="relative max-w-xs w-full md:hidden">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-400">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input id="global-search" type="text" placeholder="Search guide/commands..." class="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand focus:border-brand">
+                </div>
+
+                <button id="sidebar-toggle-desktop" class="hidden md:flex p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white" title="Toggle Sidebar" onclick="toggleSidebar()">
+                    <svg id="sidebar-open-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    </svg>
+                    <svg id="sidebar-close-icon" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M6 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                <div class="flex flex-wrap bg-zinc-950 p-1 rounded-lg border border-zinc-800 gap-px">
+                    <a href="index.html" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all">Dashboard</a>
+                    <a href="index.html" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all">Presentation</a>
+                    <a href="tickets.html" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all flex items-center gap-1">
+                        <svg class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Tickets
+                    </a>
+                    <a href="skills.html" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-brand/10 transition-all flex items-center gap-1">
+                        <svg class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                        Skills
+                    </a>
+                </div>
+
+                <div class="relative" id="resources-dropdown">
+                    <button id="resources-btn" class="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white flex items-center gap-1.5" title="Resources" onclick="toggleResourcesDropdown()">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                        <span class="hidden sm:inline">Resources</span>
+                        <svg id="resources-chevron" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <div id="resources-menu" class="hidden absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50">
+                        <div class="p-2 space-y-1">
+                            <a href="tickets.html" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                Ticket System
+                            </a>
+                            <a href="skills.html" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                AI Harness Skills
+                            </a>
+                            <hr class="border-zinc-800 my-1">
+                            <button onclick="renderMarkdown('info/f-rr-d.md', 'f-rr-d (förråd) — Centralized Thoughts'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+                                f-rr-d (Centralized Thoughts)
+                            </button>
+                            <button onclick="renderMarkdown('info/wayofwork.md', 'Way of Work'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                Way of Work
+                            </button>
+                            <button onclick="renderMarkdown('info/OptiCat.md', 'OptiCat'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                OptiCat
+                            </button>
+                            <button onclick="renderMarkdown('info/wayofmono.md', 'WayOfMono'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                WayOfMono
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-8">
+
+        <!-- What is a Ticket System? -->
+        <div id="intro" class="bg-gradient-to-br from-zinc-900/60 to-zinc-950 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-brand/10 border border-brand/20 rounded-xl text-brand">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">What is a Ticket System?</h2>
+                    <p class="text-sm text-zinc-400 mt-1">Think of it like a team to-do list on steroids.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <p class="text-sm text-zinc-300 leading-relaxed">
+                        A <strong class="text-white">ticket</strong> is simply a task that needs to get done. Every bug fix, new feature, or improvement starts as a ticket. The ticket system makes sure nothing gets lost, everyone knows who is working on what, and work flows smoothly from start to finish.
+                    </p>
+                    <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl">
+                        <h4 class="text-xs font-bold text-zinc-400 mb-2 uppercase tracking-wide">Think of it like a restaurant kitchen:</h4>
+                        <ul class="space-y-2 text-sm text-zinc-300">
+                            <li class="flex items-start gap-2">
+                                <span class="text-brand mt-1">🍽️</span>
+                                <span>A customer orders a dish (this is a <strong>ticket</strong>)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-brand mt-1">📝</span>
+                                <span>The order is written down with all the details (<strong>ticket context</strong>)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-brand mt-1">👨‍🍳</span>
+                                <span>The chef cooks each step in order (<strong>ticket executor</strong>)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-brand mt-1">🧑‍💼</span>
+                                <span>The manager tracks all orders, prioritizes, and makes sure everything runs (<strong>ticket manager</strong>)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="p-4 bg-brand/5 border border-brand/10 rounded-xl">
+                        <h4 class="text-xs font-bold text-brand mb-2 uppercase tracking-wide">Why this matters for you</h4>
+                        <p class="text-sm text-zinc-300 leading-relaxed">
+                            Instead of juggling emails, messages, and sticky notes, every task has a <strong class="text-white">single home</strong>. You always know:
+                        </p>
+                        <ul class="mt-2 space-y-1.5 text-sm text-zinc-400">
+                            <li class="flex items-center gap-2">✅ What you should be working on</li>
+                            <li class="flex items-center gap-2">✅ What the quality bar is</li>
+                            <li class="flex items-center gap-2">✅ Who to ask when stuck</li>
+                            <li class="flex items-center gap-2">✅ What happens after you finish</li>
+                        </ul>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-brand/10 text-brand border border-brand/20">WOMONO</span>
+                        <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">WOW</span>
+                        <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">OPT</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Section -->
+        <div id="video" class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 shadow-xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-brand/10 border border-brand/20 rounded-xl text-brand">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white">Watch: Ticket System Explained</h3>
+                    <p class="text-xs text-zinc-400">A video walkthrough of the whole workflow</p>
+                </div>
+            </div>
+            <div class="aspect-video rounded-xl bg-zinc-950 overflow-hidden">
+                <iframe src="https://www.youtube.com/embed/wIM3X0OwhKY"
+                        class="w-full h-full"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <!-- The Big Picture -->
+        <div id="overview" class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 sm:p-7 shadow-xl">
+            <h3 class="text-lg font-bold text-white mb-2">How the Three Pieces Fit Together</h3>
+            <p class="text-sm text-zinc-400 mb-6">Three AI "skills" work as a team to take a task from idea to completion. Here is the flow in everyday language:</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5 hover:border-brand/40 transition-all">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="w-6 h-6 rounded flex items-center justify-center text-xs font-bold font-mono bg-brand/10 text-brand border border-brand/20">1</span>
+                        <h4 class="text-sm font-bold text-white">Ticket Context</h4>
+                    </div>
+                    <p class="text-xs text-zinc-400 mb-2">The "what and why" of the task.</p>
+                    <p class="text-xs text-zinc-500 leading-relaxed">Loads the ticket, checks that everyone agrees on what done means, and makes sure the task is ready to start.</p>
+                </div>
+                <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5 hover:border-brand/40 transition-all">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="w-6 h-6 rounded flex items-center justify-center text-xs font-bold font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">2</span>
+                        <h4 class="text-sm font-bold text-white">Ticket Executor</h4>
+                    </div>
+                    <p class="text-xs text-zinc-400 mb-2">The "how" — does the actual work.</p>
+                    <p class="text-xs text-zinc-500 leading-relaxed">Follows the plan step by step, checks for quality after each step, and handles urgent "drop everything" tasks.</p>
+                </div>
+                <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5 hover:border-brand/40 transition-all">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="w-6 h-6 rounded flex items-center justify-center text-xs font-bold font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">3</span>
+                        <h4 class="text-sm font-bold text-white">Ticket Manager</h4>
+                    </div>
+                    <p class="text-xs text-zinc-400 mb-2">The "big picture" organizer.</p>
+                    <p class="text-xs text-zinc-500 leading-relaxed">Creates tickets, moves them through stages, tracks progress across all projects, and generates team overviews.</p>
+                </div>
+            </div>
+            <div class="mt-6 p-4 bg-zinc-950 border border-zinc-800 rounded-xl">
+                <p class="text-xs text-zinc-400 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    <span>The full journey: <strong class="text-zinc-200">Got an idea? → Write it as a ticket → Plan the work → Do the work → Check it → Ship it</strong></span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Skills Deep Dive -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Ticket Context Deep Dive -->
+            <div id="ticket_context" class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xl">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-brand/10 text-brand border border-brand/20">Skill 1</span>
+                    <h3 class="text-base font-bold text-white">ticket_context</h3>
+                </div>
+                <p class="text-xs text-zinc-500 mb-1 italic">"Load the ticket and make sure we all agree on what needs to happen."</p>
+                <hr class="border-zinc-800 my-3">
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="text-xs font-bold text-zinc-300 mb-1 uppercase tracking-wide">What it does</h4>
+                        <p class="text-sm text-zinc-300 leading-relaxed">
+                            Before anyone starts writing code, this skill finds the ticket file, reads it, and checks that the <strong class="text-white">acceptance criteria</strong> (the list of things that must be true for the task to be considered done) are clear and complete. If something is missing or unclear, it asks for clarification <em>before</em> work starts — saving everyone time.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-zinc-300 mb-1 uppercase tracking-wide">How it works (step by step)</h4>
+                        <ol class="space-y-2 text-sm text-zinc-300">
+                            <li class="flex items-start gap-2">
+                                <span class="w-5 h-5 rounded bg-zinc-800 text-brand flex items-center justify-center font-bold text-xs mt-0.5 flex-shrink-0">1</span>
+                                <span>You give it a ticket ID like <code class="text-brand font-mono text-xs">WOW-042</code></span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-5 h-5 rounded bg-zinc-800 text-brand flex items-center justify-center font-bold text-xs mt-0.5 flex-shrink-0">2</span>
+                                <span>It finds the ticket file in the correct folder</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-5 h-5 rounded bg-zinc-800 text-brand flex items-center justify-center font-bold text-xs mt-0.5 flex-shrink-0">3</span>
+                                <span>It checks the acceptance criteria against our quality bar</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-5 h-5 rounded bg-zinc-800 text-brand flex items-center justify-center font-bold text-xs mt-0.5 flex-shrink-0">4</span>
+                                <span>If something would break our quality rules, it stops and asks you to fix it</span>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                        <h4 class="text-xs font-bold text-amber-400 mb-1 uppercase tracking-wide">What "production-ready" means</h4>
+                        <p class="text-sm text-zinc-300">Before any code is accepted, it must pass these checks:</p>
+                        <ul class="mt-1.5 space-y-1 text-sm text-zinc-400">
+                            <li class="flex items-start gap-2">❌ No fake/test data pretending to be real</li>
+                            <li class="flex items-start gap-2">✅ Errors are handled gracefully (no crashes)</li>
+                            <li class="flex items-start gap-2">✅ We can see what the code is doing (logging/monitoring)</li>
+                            <li class="flex items-start gap-2">✅ Security is not an afterthought</li>
+                            <li class="flex items-start gap-2">✅ Edge cases (weird inputs, unusual situations) are handled</li>
+                            <li class="flex items-start gap-2">✅ Failure scenarios are tested</li>
+                        </ul>
+                    </div>
+                    <div class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl">
+                        <p class="text-xs text-zinc-500"><strong class="text-zinc-300">In plain English:</strong> Think of this as a quality gatekeeper. Before a builder starts building, someone checks that the blueprints are complete and meet building codes. This skill does that — automatically.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ticket Executor Deep Dive -->
+            <div id="ticket_executor" class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xl">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">Skill 2</span>
+                    <h3 class="text-base font-bold text-white">ticket_executor</h3>
+                </div>
+                <p class="text-xs text-zinc-500 mb-1 italic">"Follow the plan, one step at a time, and stop if something goes wrong."</p>
+                <hr class="border-zinc-800 my-3">
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="text-xs font-bold text-zinc-300 mb-1 uppercase tracking-wide">What it does</h4>
+                        <p class="text-sm text-zinc-300 leading-relaxed">
+                            This is the "doer." It takes a plan and executes it in phases. After each phase it checks that everything is working (telemetry = measuring that the code does what it should). It will not move to the next step until the current step is verified.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-zinc-300 mb-1 uppercase tracking-wide">Commands you can use</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-2.5 bg-zinc-950 border border-zinc-800 rounded-lg">
+                                <div>
+                                    <code class="text-brand font-mono text-xs font-bold">/implement_plan</code>
+                                    <p class="text-xs text-zinc-500 mt-0.5">Start executing the full plan</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 bg-zinc-950 border border-zinc-800 rounded-lg">
+                                <div>
+                                    <code class="text-brand font-mono text-xs font-bold">/execute_phase</code>
+                                    <p class="text-xs text-zinc-500 mt-0.5">Run just the next phase</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 bg-zinc-950 border border-zinc-800 rounded-lg">
+                                <div>
+                                    <code class="text-brand font-mono text-xs font-bold">/skip_phase</code>
+                                    <p class="text-xs text-zinc-500 mt-0.5">Skip a phase you do not need</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-rose-500/5 border border-rose-500/20 rounded-xl">
+                        <div class="flex items-start gap-2">
+                            <span class="text-rose-400 text-lg leading-none mt-0.5">🚨</span>
+                            <div>
+                                <h4 class="text-xs font-bold text-rose-400 mb-1 uppercase tracking-wide">Enforcement Tickets — The "Drop Everything" Button</h4>
+                                <p class="text-sm text-zinc-300 leading-relaxed">
+                                    Sometimes a critical issue comes up that is more important than anything else. An <strong class="text-rose-300">enforcement ticket</strong> lives in a special folder and overrides all other work. While it is open, all other tasks <strong class="text-rose-300">must pause</strong> until it is resolved. This is how we handle emergencies without losing track of regular work.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl">
+                        <p class="text-xs text-zinc-500"><strong class="text-zinc-300">In plain English:</strong> Imagine renovating a house room by room. You finish the kitchen, check that everything works (lights, plumbing), then move to the bathroom. If there is a gas leak (enforcement ticket), you stop everything immediately and fix it first.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ticket Manager Deep Dive (Full Width) -->
+            <div id="ticket_manager" class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 sm:p-7 shadow-xl lg:col-span-2">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">Skill 3</span>
+                    <h3 class="text-base font-bold text-white">ticket_manager</h3>
+                </div>
+                <p class="text-xs text-zinc-500 mb-1 italic">"The organizer — creates, tracks, and manages tickets across all projects."</p>
+                <hr class="border-zinc-800 my-3">
+
+                <div class="mb-6">
+                    <h4 class="text-xs font-bold text-zinc-300 mb-2 uppercase tracking-wide">What it does</h4>
+                    <p class="text-sm text-zinc-300 leading-relaxed">
+                        This is the control center. It handles everything from creating a new ticket to moving it through the stages of work, assigning people, and making sure nothing falls through the cracks. It works across <strong class="text-white">all three projects</strong> (WayOfMono, WayOfWork, Opticat) at the same time.
+                    </p>
+                </div>
+
+                <!-- How Tickets Are Named -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl">
+                        <h4 class="text-xs font-bold text-brand mb-3 uppercase tracking-wide">How tickets are named</h4>
+                        <p class="text-sm text-zinc-400 mb-3">Every ticket gets a unique name so you can find it instantly. The format is:</p>
+                        <div class="bg-zinc-900 rounded-lg p-3 font-mono text-sm text-zinc-200 text-center border border-zinc-800 mb-3">
+                            &lt;PROJECT&gt;-&lt;NUMBER&gt;-&lt;SHORT-DESCRIPTION&gt;.md
+                        </div>
+                        <p class="text-xs text-zinc-500 mb-2">Real examples:</p>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center gap-2 p-2 bg-zinc-900 rounded-lg">
+                                <span class="px-1.5 py-0.5 rounded bg-brand/10 text-brand font-mono text-xs font-bold">WOMONO-044</span>
+                                <span class="text-zinc-400">→ WayOfMono project, ticket #44</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-zinc-900 rounded-lg">
+                                <span class="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono text-xs font-bold">WOW-001</span>
+                                <span class="text-zinc-400">→ WayOfWork project, ticket #1</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-zinc-900 rounded-lg">
+                                <span class="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 font-mono text-xs font-bold">OPT-001</span>
+                                <span class="text-zinc-400">→ Opticat project, ticket #1</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 p-2 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                            <p class="text-xs text-amber-400"><strong>Tip:</strong> The description is always in <strong>UPPERCASE</strong> with dashes instead of spaces, like <code class="font-mono">ADD-LOGIN-BUTTON</code></p>
+                        </div>
+                    </div>
+
+                    <!-- Where Tickets Live -->
+                    <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl">
+                        <h4 class="text-xs font-bold text-brand mb-3 uppercase tracking-wide">Where tickets live (storage)</h4>
+                        <p class="text-sm text-zinc-400 mb-3">All tickets are stored as simple files in the <code class="text-brand font-mono text-xs">f-rr-d</code> repository. Each project has its own folder:</p>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between p-3 bg-zinc-900 rounded-lg">
+                                <span class="font-mono text-zinc-300">WOMONO tickets</span>
+                                <code class="text-brand font-mono text-xs">thoughts/wayofmono/shared/tickets/</code>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-zinc-900 rounded-lg">
+                                <span class="font-mono text-zinc-300">WOW tickets</span>
+                                <code class="text-blue-400 font-mono text-xs">thoughts/wow/shared/tickets/</code>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-zinc-900 rounded-lg">
+                                <span class="font-mono text-zinc-300">OPT tickets</span>
+                                <code class="text-purple-400 font-mono text-xs">thoughts/opticat/shared/tickets/</code>
+                            </div>
+                        </div>
+                        <hr class="border-zinc-800 my-3">
+                        <div class="space-y-1.5 text-sm text-zinc-400">
+                            <p><strong class="text-zinc-300">Your personal tickets:</strong> <code class="text-zinc-500 font-mono text-xs">thoughts/&lt;project&gt;/&lt;your-name&gt;/tickets/</code></p>
+                            <p><strong class="text-rose-400">🚨 Emergency tickets:</strong> <code class="text-rose-400 font-mono text-xs">thoughts/&lt;project&gt;/enforcement-ticket/</code></p>
+                            <p><strong class="text-zinc-300">Blank template:</strong> <code class="text-zinc-500 font-mono text-xs">thoughts/shared/tickets/ticket-template.md</code></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ticket Lifecycle -->
+                <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl mb-6">
+                    <h4 class="text-xs font-bold text-zinc-300 mb-3 uppercase tracking-wide">The life of a ticket (status flow)</h4>
+                    <p class="text-sm text-zinc-400 mb-3">Every ticket moves through these stages. Think of it like a package tracking system:</p>
+                    <div class="flex flex-wrap items-center gap-1.5 text-xs font-mono mb-3">
+                        <span class="px-2 py-1 rounded bg-zinc-800 text-zinc-400">📥 Backlog</span>
+                        <span class="text-zinc-600">→</span>
+                        <span class="px-2 py-1 rounded bg-zinc-800 text-zinc-400">📋 Planned</span>
+                        <span class="text-zinc-600">→</span>
+                        <span class="px-2 py-1 rounded bg-zinc-800 text-zinc-400">✅ Ready</span>
+                        <span class="text-zinc-600">→</span>
+                        <span class="px-2 py-1 rounded bg-brand/20 text-brand border border-brand/30">🔧 In Progress</span>
+                        <span class="text-zinc-600">→</span>
+                        <span class="px-2 py-1 rounded bg-zinc-800 text-zinc-400">👀 Submitted for Review</span>
+                        <span class="text-zinc-600">→</span>
+                        <span class="px-2 py-1 rounded bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">📖 In Review</span>
+                        <span class="text-zinc-600">→</span>
+                        <span class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">👍 Approved</span>
+                        <span class="text-zinc-600">→</span>
+                        <span class="px-2 py-1 rounded bg-green-500/20 text-green-400 border border-green-500/30">✅ Done</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 text-xs font-mono">
+                        <span class="text-zinc-500 italic">If something needs fixing:</span>
+                        <span class="px-2 py-1 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30">🔄 Changes Requested</span>
+                        <span class="text-zinc-600">→ back to →</span>
+                        <span class="px-2 py-1 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30">🔧 In Progress</span>
+                        <span class="text-zinc-400 ml-2">or</span>
+                        <span class="px-2 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/30">🚫 Blocked</span>
+                    </div>
+                </div>
+
+                <!-- Commands Reference -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl">
+                        <h4 class="text-xs font-bold text-zinc-300 mb-3 uppercase tracking-wide">Useful commands</h4>
+                        <p class="text-sm text-zinc-500 mb-2">Type these in the AI chat to manage tickets:</p>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-2.5 bg-zinc-900 rounded-lg">
+                                <div>
+                                    <code class="text-brand font-mono text-xs font-bold">/work WOW-042</code>
+                                    <p class="text-xs text-zinc-500">Start working on ticket WOW-042</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 bg-zinc-900 rounded-lg">
+                                <div>
+                                    <code class="text-brand font-mono text-xs font-bold">/complete WOW-042</code>
+                                    <p class="text-xs text-zinc-500">Mark it as done (or submit for review)</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 bg-zinc-900 rounded-lg">
+                                <div>
+                                    <code class="text-brand font-mono text-xs font-bold">/sync team</code>
+                                    <p class="text-xs text-zinc-500">See what everyone is working on</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 bg-zinc-900 rounded-lg">
+                                <div>
+                                    <code class="text-brand font-mono text-xs font-bold">/ticket create</code>
+                                    <p class="text-xs text-zinc-500">Create a new ticket (guided wizard)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl">
+                        <h4 class="text-xs font-bold text-zinc-300 mb-3 uppercase tracking-wide">Ticket information fields</h4>
+                        <p class="text-sm text-zinc-500 mb-2">Every ticket has these fields at the top (frontmatter):</p>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div class="p-2 bg-zinc-900 rounded flex items-center justify-between">
+                                <span class="text-zinc-400">📌 title</span>
+                                <span class="text-zinc-500 text-xs">What is this task?</span>
+                            </div>
+                            <div class="p-2 bg-zinc-900 rounded flex items-center justify-between">
+                                <span class="text-zinc-400">🏷️ type</span>
+                                <span class="text-zinc-500 text-xs">Feature/Bug/Fix</span>
+                            </div>
+                            <div class="p-2 bg-zinc-900 rounded flex items-center justify-between">
+                                <span class="text-zinc-400">⚡ priority</span>
+                                <span class="text-zinc-500 text-xs">How urgent?</span>
+                            </div>
+                            <div class="p-2 bg-zinc-900 rounded flex items-center justify-between">
+                                <span class="text-zinc-400">📊 status</span>
+                                <span class="text-zinc-500 text-xs">Where in the flow?</span>
+                            </div>
+                            <div class="p-2 bg-zinc-900 rounded flex items-center justify-between">
+                                <span class="text-zinc-400">👤 assignee</span>
+                                <span class="text-zinc-500 text-xs">Who is doing it?</span>
+                            </div>
+                            <div class="p-2 bg-zinc-900 rounded flex items-center justify-between">
+                                <span class="text-zinc-400">📝 reporter</span>
+                                <span class="text-zinc-500 text-xs">Who created it?</span>
+                            </div>
+                            <div class="p-2 bg-zinc-900 rounded flex items-center justify-between lg:col-span-2">
+                                <span class="text-zinc-400">🔗 pr_url</span>
+                                <span class="text-zinc-500 text-xs">Link to the code changes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick visual: ticket types and priorities -->
+                <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl">
+                    <h4 class="text-xs font-bold text-zinc-300 mb-2 uppercase tracking-wide">Quick reference: Types & Priorities</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-xs text-zinc-500 mb-1 font-bold uppercase">Types of tickets:</p>
+                            <ul class="space-y-1 text-zinc-400">
+                                <li><span class="text-brand">✨</span> <strong class="text-zinc-300">Feature</strong> — A new capability</li>
+                                <li><span class="text-red-400">🐛</span> <strong class="text-zinc-300">Bug</strong> — Something broken</li>
+                                <li><span class="text-yellow-400">🧹</span> <strong class="text-zinc-300">TechDebt</strong> — Clean up/improve code</li>
+                                <li><span class="text-purple-400">📦</span> <strong class="text-zinc-300">Epic</strong> — A big multi-step project</li>
+                                <li><span class="text-blue-400">💡</span> <strong class="text-zinc-300">Improvement</strong> — Make something better</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="text-xs text-zinc-500 mb-1 font-bold uppercase">Priority levels:</p>
+                            <ul class="space-y-1 text-zinc-400">
+                                <li><span class="text-red-400">🔴</span> <strong class="text-zinc-300">Critical</strong> — Must fix now (blocks everything)</li>
+                                <li><span class="text-orange-400">🟠</span> <strong class="text-zinc-300">High</strong> — Important, do soon</li>
+                                <li><span class="text-yellow-400">🟡</span> <strong class="text-zinc-300">Medium</strong> — Normal priority</li>
+                                <li><span class="text-zinc-500">⚪</span> <strong class="text-zinc-300">Low</strong> — Nice to have</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- f-rr-d Centralized Storage -->
+        <div id="frrd" class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 sm:p-7 shadow-xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-brand/10 border border-brand/20 rounded-xl text-brand">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">f-rr-d (förråd) — The Central Brain</h3>
+                    <p class="text-xs text-zinc-400">Swedish for "storage" — this is where all tickets, plans, and knowledge live</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-3">
+                    <p class="text-sm text-zinc-300 leading-relaxed">
+                        <strong class="text-white">f-rr-d</strong> (pronounced "förråd", Swedish for "storage") is a git repository that acts as the <strong class="text-white">single source of truth</strong> for everything: tickets, plans, research notes, and personal todos. It is cloned inside each project as a folder called <code class="text-brand font-mono text-xs">thoughts/</code>.
+                    </p>
+                    <div class="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                        <h4 class="text-xs font-bold text-amber-400 mb-2 uppercase tracking-wide">Important rule: APPEND ONLY</h4>
+                        <p class="text-sm text-zinc-300 leading-relaxed">
+                            You can <strong class="text-white">add</strong> new files, but never delete, rename, or edit existing ones. This keeps a complete history of every decision and idea — like a digital diary that never forgets.
+                        </p>
+                    </div>
+                    <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl">
+                        <h4 class="text-xs font-bold text-zinc-300 mb-2 uppercase tracking-wide">Which project uses what prefix?</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between p-2 bg-zinc-900 rounded-lg">
+                                <span class="text-zinc-300">WayOfMono</span>
+                                <span class="text-brand font-mono font-bold">WOMONO</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-zinc-900 rounded-lg">
+                                <span class="text-zinc-300">WayOfWork (WoW)</span>
+                                <span class="text-blue-400 font-mono font-bold">WOW</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-zinc-900 rounded-lg">
+                                <span class="text-zinc-300">Opticat</span>
+                                <span class="text-purple-400 font-mono font-bold">OPT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="p-4 bg-zinc-950 border border-zinc-800 rounded-xl">
+                        <h4 class="text-xs font-bold text-zinc-300 mb-2 uppercase tracking-wide">Folder structure (visual map)</h4>
+                        <pre class="text-xs text-zinc-400 font-mono leading-relaxed">thoughts/                    ← The f-rr-d clone
+├── shared/                  ← Templates shared by all
+│   ├── tickets/
+│   │   └── ticket-template.md
+│   ├── plans/
+│   └── research/
+├── wayofmono/               ← WOMONO tickets
+│   └── shared/tickets/
+├── wow/                     ← WOW tickets
+│   └── shared/tickets/
+└── opticat/                 ← OPT tickets
+    └── shared/tickets/</pre>
+                    </div>
+                    <div class="mt-3">
+                        <a href="info/f-rr-d.md" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand text-zinc-950 rounded-lg text-sm font-semibold hover:bg-brand/90 transition-all">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                            Read full f-rr-d docs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Reference Card -->
+        <div id="cheatsheet" class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Cheat Sheet: Your First Ticket</h3>
+                    <p class="text-xs text-zinc-400">Step-by-step from idea to done</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl">
+                    <span class="text-brand text-lg font-bold">1</span>
+                    <h4 class="text-sm font-bold text-white mt-1">Create the ticket</h4>
+                    <p class="text-xs text-zinc-400 mt-1">Type <code class="text-brand font-mono text-xs">/ticket create</code> and follow the wizard.</p>
+                </div>
+                <div class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl">
+                    <span class="text-brand text-lg font-bold">2</span>
+                    <h4 class="text-sm font-bold text-white mt-1">Start working</h4>
+                    <p class="text-xs text-zinc-400 mt-1">Type <code class="text-brand font-mono text-xs">/work WOW-001</code> to load and start.</p>
+                </div>
+                <div class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl">
+                    <span class="text-brand text-lg font-bold">3</span>
+                    <h4 class="text-sm font-bold text-white mt-1">Execute the plan</h4>
+                    <p class="text-xs text-zinc-400 mt-1">Type <code class="text-brand font-mono text-xs">/implement_plan</code> to build step by step.</p>
+                </div>
+                <div class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl">
+                    <span class="text-brand text-lg font-bold">4</span>
+                    <h4 class="text-sm font-bold text-white mt-1">Finish up</h4>
+                    <p class="text-xs text-zinc-400 mt-1">Type <code class="text-brand font-mono text-xs">/complete WOW-001</code> to ship it.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Check -->
+        <div id="audit" class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Health Check: Audit All Tickets</h3>
+                    <p class="text-xs text-zinc-400">Run this command to check that all tickets are valid and well-formed</p>
+                </div>
+            </div>
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
+                <code class="text-xs font-mono text-emerald-400">deno run -A assets/audit-tickets.js</code>
+                <button class="text-xs text-brand hover:underline font-bold" onclick="copyCommand('deno run -A assets/audit-tickets.js', 'Audit command copied!')">Copy</button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="border-t border-zinc-800/80 bg-zinc-950 py-6 px-4 text-center text-xs text-zinc-500">
+        <p>© 2026 WayOfMono Engineering. Ticket System Reference.</p>
+        <p class="mt-1">f-rr-d (förråd) — Swedish for "storage" — Centralized Thoughts Repository.</p>
+        <p class="mt-3">
+            <a href="index.html" class="text-brand hover:underline text-sm font-medium inline-flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Onboarding Center
+            </a>
+        </p>
+    </footer>
+
+    <script>
+        function copyCommand(text, message) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) showToast(message);
+            } catch (err) {
+                console.error(err);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            msgEl.textContent = message;
+            toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        // Resources Dropdown
+        function toggleResourcesDropdown() {
+            const menu = document.getElementById('resources-menu');
+            const chevron = document.getElementById('resources-chevron');
+            menu.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
+        }
+
+        function closeResourcesDropdown() {
+            const menu = document.getElementById('resources-menu');
+            const chevron = document.getElementById('resources-chevron');
+            menu.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+        }
+
+        // Markdown Viewer
+        async function renderMarkdown(path, title) {
+            const viewer = document.getElementById('md-viewer');
+            const titleEl = document.getElementById('md-viewer-title-text');
+            const contentEl = document.getElementById('md-viewer-content');
+            titleEl.textContent = title;
+            contentEl.innerHTML = '<div class="text-zinc-400 text-sm">Loading...</div>';
+            viewer.classList.remove('hidden');
+            viewer.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+            try {
+                const res = await fetch(path);
+                const text = await res.text();
+                if (typeof marked !== 'undefined' && marked.parse) {
+                    contentEl.innerHTML = marked.parse(text);
+                } else {
+                    contentEl.innerHTML = '<pre class="text-sm text-zinc-300 font-mono whitespace-pre-wrap">' + escapeHtml(text) + '</pre>';
+                }
+            } catch (err) {
+                contentEl.innerHTML = '<div class="text-red-400 text-sm">Failed to load document.</div>';
+            }
+        }
+
+        function closeMarkdownViewer() {
+            const viewer = document.getElementById('md-viewer');
+            viewer.classList.add('hidden');
+            viewer.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ESC key closes dropdown and markdown viewer
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeResourcesDropdown();
+                closeMarkdownViewer();
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('resources-dropdown');
+            const menu = document.getElementById('resources-menu');
+            const btn = document.getElementById('resources-btn');
+            if (dropdown && menu && btn && !dropdown.contains(e.target)) {
+                menu.classList.add('hidden');
+                const chevron = document.getElementById('resources-chevron');
+                if (chevron) chevron.classList.remove('rotate-180');
+            }
+        });
+
+        // Deep linking: scroll to section matching URL hash on load
+        window.addEventListener('DOMContentLoaded', function() {
+            const hash = window.location.hash.slice(1);
+            if (hash) {
+                const el = document.getElementById(hash);
+                if (el) {
+                    setTimeout(function() {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 300);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

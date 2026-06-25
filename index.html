@@ -33,6 +33,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Marked.js for GitHub-flavored markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
         body {
@@ -66,6 +68,25 @@
         .transition-transform {
             transition: transform 0.2s ease;
         }
+        .presentation-mode #slide-title {
+            font-size: 2.5rem;
+            line-height: 1.2;
+        }
+        .presentation-mode #slide-body {
+            font-size: 1.125rem;
+            line-height: 1.8;
+        }
+        .presentation-mode #slide-body code {
+            font-size: 0.9rem;
+        }
+        .presentation-mode #slide-step-badge {
+            font-size: 0.7rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .presentation-mode .slide-panel-inner {
+            max-width: 48rem;
+            margin: 0 auto;
+        }
         #side-panel-column {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -91,6 +112,24 @@
     </style>
 </head>
 <body class="text-zinc-100 bg-zinc-950 min-h-screen flex flex-col overflow-x-hidden antialiased custom-scrollbar">
+
+    <!-- Markdown Viewer Modal -->
+    <div id="md-viewer" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b border-zinc-800">
+                <h3 id="md-viewer-title" class="text-sm font-bold text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+                    <span id="md-viewer-title-text">Document</span>
+                </h3>
+                <button onclick="closeMarkdownViewer()" class="p-1.5 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white transition-all">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="md-viewer-content" class="flex-1 overflow-y-auto p-6 custom-scrollbar prose prose-invert prose-sm max-w-none">
+                <div class="text-zinc-400 text-sm">Loading...</div>
+            </div>
+        </div>
+    </div>
 
     <!-- Notification Toast System -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 bg-zinc-900 border border-brand-500/30 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm">
@@ -151,18 +190,24 @@
                 </button>
 
                 <!-- View mode buttons + Ticket System -->
-                <div class="flex bg-zinc-950 p-1 rounded-lg border border-zinc-800">
-                    <button id="view-presentation" class="px-3 py-1 rounded text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all" onclick="setViewMode('presentation')">
-                        Presentation
-                    </button>
-                    <button id="view-dashboard" class="px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all" onclick="setViewMode('dashboard')">
+                <div class="flex flex-wrap bg-zinc-950 p-1 rounded-lg border border-zinc-800 gap-px">
+                    <button id="view-dashboard" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all" onclick="setViewMode('dashboard')">
                         Dashboard
                     </button>
-                    <button id="view-tickets" class="px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-brand/10 transition-all flex items-center gap-1.5" onclick="showTicketPage()" title="Ticket System">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button id="view-presentation" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all" onclick="setViewMode('presentation')">
+                        Presentation
+                    </button>
+                    <button id="view-tickets" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-brand/10 transition-all flex items-center gap-1" onclick="showTicketPage()" title="Ticket System">
+                        <svg class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Tickets
+                    </button>
+                    <button id="view-skills" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-brand/10 transition-all flex items-center gap-1" onclick="showSkillsPage()" title="AI Harness Skills">
+                        <svg class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                        Skills
                     </button>
                 </div>
 
@@ -181,49 +226,44 @@
                         <div class="p-2 space-y-1">
                             <a href="#" onclick="showTicketPage(); return false;" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
                                 <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round"round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 Ticket System
                             </a>
+                            <a href="#" onclick="showSkillsPage(); return false;" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                                AI Harness Skills
+                            </a>
                             <hr class="border-zinc-800 my-1">
-                            <a href="info/f-rr-d.md" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                            <button onclick="renderMarkdown('info/f-rr-d.md', 'f-rr-d (förråd) — Centralized Thoughts'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
                                 <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                 </svg>
                                 f-rr-d (Centralized Thoughts)
-                            </a>
-                            <a href="info/wayofwork.md" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                            </button>
+                            <button onclick="renderMarkdown('info/wayofwork.md', 'Way of Work'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
                                 <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                                 Way of Work
-                            </a>
-                            <a href="info/OptiCat.md" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                            </button>
+                            <button onclick="renderMarkdown('info/OptiCat.md', 'OptiCat'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
                                 <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                 </svg>
                                 OptiCat
-                            </a>
-                            <a href="info/wayofmono.md" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                            </button>
+                            <button onclick="renderMarkdown('info/wayofmono.md', 'WayOfMono'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
                                 <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                 </svg>
                                 WayOfMono
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
-
-                <button id="theme-toggle" class="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white" title="Toggle Theme" onclick="toggleTheme()">
-                    <!-- Light theme icon (sun) -->
-                    <svg id="theme-sun" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m2.828 0l-.707-.707m12.022-12.022l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
-                    </svg>
-                    <!-- Dark theme icon (moon) -->
-                    <svg id="theme-moon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                </button>
             </div>
         </div>
     </header>
@@ -302,25 +342,27 @@
                     <div class="absolute -top-12 -right-12 w-48 h-48 bg-brand/5 rounded-full blur-3xl pointer-events-none"></div>
                     <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-                    <!-- Slide Header Details -->
-                    <div>
-                        <div class="flex items-center justify-between gap-4 mb-6">
-                            <span id="slide-step-badge" class="text-xs font-bold tracking-widest text-brand uppercase bg-brand/10 border border-brand/20 px-3 py-1 rounded-full">
-                                Getting Started
-                            </span>
-                            <div class="flex items-center gap-2 text-xs text-zinc-400 font-mono">
-                                Slide <span id="current-slide-num" class="text-zinc-200 font-bold">1</span> of <span id="total-slides-num" class="font-bold">13</span>
+                    <div class="slide-panel-inner w-full">
+                        <!-- Slide Header Details -->
+                        <div>
+                            <div class="flex items-center justify-between gap-4 mb-6">
+                                <span id="slide-step-badge" class="text-xs font-bold tracking-widest text-brand uppercase bg-brand/10 border border-brand/20 px-3 py-1 rounded-full">
+                                    Getting Started
+                                </span>
+                                <div class="flex items-center gap-2 text-xs text-zinc-400 font-mono">
+                                    Slide <span id="current-slide-num" class="text-zinc-200 font-bold">1</span> of <span id="total-slides-num" class="font-bold">13</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Slide Title -->
-                        <h2 id="slide-title" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight mb-4">
-                            Welcome Title Here
-                        </h2>
-                        
-                        <!-- Slide Content Body -->
-                        <div id="slide-body" class="text-zinc-300 text-sm sm:text-base space-y-4 leading-relaxed slide-transition">
-                            <!-- Dynamic Content Inserted Here -->
+                            <!-- Slide Title -->
+                            <h2 id="slide-title" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight mb-4">
+                                Welcome Title Here
+                            </h2>
+                            
+                            <!-- Slide Content Body -->
+                            <div id="slide-body" class="text-zinc-300 text-sm sm:text-base space-y-4 leading-relaxed slide-transition">
+                                <!-- Dynamic Content Inserted Here -->
+                            </div>
                         </div>
                     </div>
 
@@ -354,16 +396,16 @@
                 </div>
 
                 <!-- Repo Links Bar (visible in both modes) -->
-                <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-4 shadow-lg">
+                <div id="repo-links-bar" class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-4 shadow-lg">
                     <div class="flex items-center gap-2 mb-2">
                         <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                         <span class="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Repositories</span>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <a href="info/f-rr-d.md" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-brand/40 hover:text-brand transition-all font-mono">f-rr-d</a>
-                        <a href="info/wayofwork.md" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-brand/40 hover:text-brand transition-all font-mono">wayofwork</a>
-                        <a href="info/OptiCat.md" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-brand/40 hover:text-brand transition-all font-mono">OptiCat</a>
-                        <a href="info/wayofmono.md" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-brand/40 hover:text-brand transition-all font-mono">wayofmono</a>
+                        <button onclick="renderMarkdown('info/f-rr-d.md', 'f-rr-d (förråd) — Centralized Thoughts')" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-brand/40 hover:text-brand transition-all font-mono">f-rr-d</button>
+                        <button onclick="renderMarkdown('info/wayofwork.md', 'Way of Work')" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-brand/40 hover:text-brand transition-all font-mono">wayofwork</button>
+                        <button onclick="renderMarkdown('info/OptiCat.md', 'OptiCat')" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-brand/40 hover:text-brand transition-all font-mono">OptiCat</button>
+                        <button onclick="renderMarkdown('info/wayofmono.md', 'WayOfMono')" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-brand/40 hover:text-brand transition-all font-mono">wayofmono</button>
                     </div>
                 </div>
 
@@ -648,7 +690,7 @@
     <script>
         // System variables
         let currentSlide = 0;
-        let viewMode = 'presentation'; // 'presentation' or 'dashboard'
+        let viewMode = 'dashboard'; // 'dashboard' or 'presentation'
         let completedSlides = Array(13).fill(false);
 
         // Load progress from localStorage if exists
@@ -1321,6 +1363,7 @@
             renderSlide();
             renderNavigationMap();
             updateCompletionProgress();
+            setViewMode('dashboard');
             
             // Watch for keyboard arrow keys
             document.addEventListener('keydown', function(event) {
@@ -1589,11 +1632,14 @@
             const sideCol = document.getElementById('side-panel-column');
             const videoSection = document.getElementById('video-section');
             const repoLinksBar = document.getElementById('repo-links-bar');
+            const slideFooter = document.querySelector('#main-content-column > div:first-child > div:last-child');
+            const slideDecos = document.querySelectorAll('#main-content-column > div:first-child > div:first-child');
 
             if (mode === 'presentation') {
-                presBtn.className = "px-3 py-1 rounded text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all";
-                dashBtn.className = "px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all";
+                presBtn.className = "px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all";
+                dashBtn.className = "px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all";
                 
+                document.body.classList.add('presentation-mode');
                 mainCol.className = "lg:col-span-12 flex flex-col gap-6 h-full";
                 sideCol.classList.add('hidden');
                 closeMobileDrawer();
@@ -1602,9 +1648,10 @@
                 if (videoSection) videoSection.classList.add('hidden');
                 if (repoLinksBar) repoLinksBar.classList.add('hidden');
             } else {
-                dashBtn.className = "px-3 py-1 rounded text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all";
-                presBtn.className = "px-3 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all";
+                dashBtn.className = "px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all";
+                presBtn.className = "px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all";
                 
+                document.body.classList.remove('presentation-mode');
                 mainCol.className = "lg:col-span-8 flex flex-col gap-6 h-full";
                 sideCol.classList.remove('hidden', 'fixed-drawer', 'open');
                 document.getElementById('completion-banner').classList.remove('hidden');
@@ -1653,13 +1700,15 @@
             chevron.classList.remove('rotate-180');
         }
 
-        // Ticket System Page Navigation
+        // Page Navigation
         function showTicketPage() {
             closeResourcesDropdown();
-            // Navigate to a ticket system page or show modal
-            // For now, show toast and could redirect to a dedicated page
-            showToast("Ticket System page - coming soon");
-            // Example: window.location.href = 'tickets.html';
+            window.location.href = 'tickets.html';
+        }
+
+        function showSkillsPage() {
+            closeResourcesDropdown();
+            window.location.href = 'skills.html';
         }
 
         // Clipboard Copy Utility (execCommand fallback safe for iframes)
@@ -1698,6 +1747,50 @@
                 toast.classList.remove('translate-y-0', 'opacity-100');
             }, 3000);
         }
+
+        // Markdown Viewer
+        async function renderMarkdown(path, title) {
+            const viewer = document.getElementById('md-viewer');
+            const titleEl = document.getElementById('md-viewer-title-text');
+            const contentEl = document.getElementById('md-viewer-content');
+            titleEl.textContent = title;
+            contentEl.innerHTML = '<div class="text-zinc-400 text-sm">Loading...</div>';
+            viewer.classList.remove('hidden');
+            viewer.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+            try {
+                const res = await fetch(path);
+                const text = await res.text();
+                if (typeof marked !== 'undefined' && marked.parse) {
+                    contentEl.innerHTML = marked.parse(text);
+                } else {
+                    contentEl.innerHTML = '<pre class="text-sm text-zinc-300 font-mono whitespace-pre-wrap">' + escapeHtml(text) + '</pre>';
+                }
+            } catch (err) {
+                contentEl.innerHTML = '<div class="text-red-400 text-sm">Failed to load document.</div>';
+            }
+        }
+
+        function closeMarkdownViewer() {
+            const viewer = document.getElementById('md-viewer');
+            viewer.classList.add('hidden');
+            viewer.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ESC key closes dropdown and markdown viewer
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeResourcesDropdown();
+                closeMarkdownViewer();
+            }
+        });
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function(e) {

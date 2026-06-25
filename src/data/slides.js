@@ -265,6 +265,10 @@ const slides = [
                     <p>• Clones the centralized thoughts workspace (<code class="text-brand font-mono text-xs">f-rr-d</code>) into a folder called <code class="text-brand font-mono text-xs">thoughts/</code> inside each repository.</p>
                     <p>• Automatically configures your <code class="text-zinc-200 font-mono">.gitignore</code> file to block thoughts/ from being committed back to main code repositories.</p>
                 </div>
+                <div class="p-3.5 bg-zinc-950 border border-zinc-700/50 rounded-xl text-xs text-zinc-300 space-y-1.5">
+                    <strong class="text-white block uppercase text-[10px]">Tip: Open the folder in Zed too</strong>
+                    <p>While you run <code class="text-brand font-mono">opencode</code> in the terminal for <code class="text-brand font-mono">/init-harness</code>, open the same project folder in <strong class="text-white">Zed</strong> alongside it. Use <code class="text-zinc-200 font-mono">zed .</code> in a <strong class="text-white">separate terminal tab or window</strong> to open the folder as a Zed project. This way you can browse files, edit code, and see the project in real time while opencode runs the CLI setup. Zed tabs are independent — running <code class="text-zinc-200 font-mono">zed .</code> from another terminal won't interfere with opencode.</p>
+                </div>
                 <p class="text-xs text-zinc-400">Exit your global opencode agent (press <kbd class="px-1 py-0.5 bg-zinc-800 rounded">Ctrl+C</kbd>) and initialize each repo workspace sequentially:</p>
                 <div class="space-y-3.5">
                     <div>

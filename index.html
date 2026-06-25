@@ -351,10 +351,10 @@
         </div>
 
         <!-- Layout Wrapper -->
-        <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="flex-1 flex flex-col gap-6 items-start">
 
             <!-- LEFT/MAIN COLUMN (Slides / Content Area) -->
-            <div id="main-content-column" class="lg:col-span-12 flex flex-col gap-6 h-full">
+            <div id="main-content-column" class="w-full flex flex-col gap-6 h-full">
                 
                 <!-- Onboarding Slide Panel -->
                 <div class="bg-zinc-900/45 border border-zinc-800/80 rounded-2xl p-5 sm:p-8 relative min-h-[550px] flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 hover:border-zinc-700/50">
@@ -449,19 +449,20 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- RIGHT COLUMN (Workspace Inspector & Quick Actions) -->
-            <div id="side-panel-column" class="flex flex-col gap-6">
+        <!-- RIGHT COLUMN (Workspace Inspector & Quick Actions) - Fixed Overlay -->
+        <div id="side-panel-column" class="flex flex-col gap-6">
 
-                <!-- Interactive Workspace Structure Inspector -->
-                <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 shadow-xl">
-                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-zinc-800">
-                        <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                            </svg>
-                            Target Workspace File Tree
-                        </h3>
+            <!-- Interactive Workspace Structure Inspector -->
+            <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 shadow-xl">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-zinc-800">
+                    <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                        </svg>
+                        Target Workspace File Tree
+                    </h3>
                         <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300">Projects/</span>
                     </div>
                     
@@ -673,7 +674,6 @@
                 </div>
 
             </div>
-        </div>
 
         <!-- DASHBOARD NAVIGATION MAP (Always Visible on Bottom / Full width in Dashboard view) -->
         <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-5 shadow-lg">

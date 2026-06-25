@@ -104,23 +104,30 @@
         #side-panel-column {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        #side-panel-column.fixed-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 40;
+            overflow-y: auto;
+            padding: 1.25rem;
+            background: #18181b;
+            border-left: 1px solid rgba(255,255,255,0.08);
+            transform: translateX(100%);
+            box-shadow: -8px 0 30px rgba(0,0,0,0.5);
+        }
+        #side-panel-column.fixed-drawer.open {
+            transform: translateX(0);
+        }
         @media (max-width: 1023px) {
             #side-panel-column.fixed-drawer {
-                position: fixed;
-                top: 0;
-                right: 0;
-                bottom: 0;
-                z-index: 40;
                 width: min(320px, 85vw);
-                overflow-y: auto;
-                padding: 1.25rem;
-                background: #18181b;
-                border-left: 1px solid rgba(255,255,255,0.08);
-                transform: translateX(100%);
-                box-shadow: -8px 0 30px rgba(0,0,0,0.5);
             }
-            #side-panel-column.fixed-drawer.open {
-                transform: translateX(0);
+        }
+        @media (min-width: 1024px) {
+            #side-panel-column.fixed-drawer {
+                width: min(400px, 35vw);
             }
         }
     </style>
@@ -683,8 +690,8 @@
 
     </main>
 
-    <!-- Mobile drawer backdrop -->
-    <div id="mobile-drawer-backdrop" class="lg:hidden fixed inset-0 z-30 bg-black/60 opacity-0 pointer-events-none transition-opacity duration-300" onclick="toggleMobilePanel()"></div>
+    <!-- Drawer backdrop (mobile + desktop) -->
+    <div id="mobile-drawer-backdrop" class="fixed inset-0 z-30 bg-black/60 opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeMobileDrawer()"></div>
 
     <!-- Footer Information -->
     <footer class="border-t border-zinc-800/80 bg-zinc-950 py-6 px-4 text-center text-xs text-zinc-500">

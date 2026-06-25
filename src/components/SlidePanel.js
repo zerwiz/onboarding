@@ -1,4 +1,3 @@
-import { scrollToTop } from '../utils/helpers.js';
 import { saveProgress } from '../utils/storage.js';
 import { clearSearch } from '../utils/search.js';
 
@@ -57,7 +56,6 @@ export function initSlidePanel(slides, state) {
         if (state.currentSlide < slides.length - 1) {
             state.currentSlide++;
             renderSlide();
-            scrollToTop();
         } else {
             window.showToast && window.showToast("All set! Remember to verify configuration on your native development hardware.");
         }
@@ -67,7 +65,6 @@ export function initSlidePanel(slides, state) {
         if (state.currentSlide > 0) {
             state.currentSlide--;
             renderSlide();
-            scrollToTop();
         }
     }
 
@@ -75,7 +72,6 @@ export function initSlidePanel(slides, state) {
         if (index >= 0 && index < slides.length) {
             state.currentSlide = index;
             renderSlide();
-            scrollToTop();
             clearSearch();
         }
     }

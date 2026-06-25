@@ -4,19 +4,27 @@ export function initHeader(slides) {
     let searchTimeout;
 
     function toggleSidebar() {
-        const sideCol = document.getElementById('side-panel-column');
+        const panel = document.getElementById('side-panel-column');
+        const backdrop = document.getElementById('mobile-drawer-backdrop');
         const openIcon = document.getElementById('sidebar-open-icon');
         const closeIcon = document.getElementById('sidebar-close-icon');
-        if (!sideCol || !openIcon || !closeIcon) return;
-        const isOpen = !sideCol.classList.contains('hidden');
-        if (isOpen) {
-            sideCol.classList.add('hidden');
+        if (!panel || !backdrop || !openIcon || !closeIcon) return;
+
+        panel.classList.add('fixed-drawer');
+        const isCurrentlyOpen = panel.classList.contains('open');
+
+        if (isCurrentlyOpen) {
+            panel.classList.remove('open');
+            backdrop.classList.add('opacity-0', 'pointer-events-none');
             openIcon.classList.remove('hidden');
             closeIcon.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
         } else {
-            sideCol.classList.remove('hidden');
+            panel.classList.add('open');
+            backdrop.classList.remove('opacity-0', 'pointer-events-none');
             openIcon.classList.add('hidden');
             closeIcon.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
         }
     }
 

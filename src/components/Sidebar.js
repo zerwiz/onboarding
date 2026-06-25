@@ -42,13 +42,17 @@ export function initSidebar() {
         const panel = document.getElementById('side-panel-column');
         const backdrop = document.getElementById('mobile-drawer-backdrop');
         const hamburgerIcon = document.getElementById('hamburger-icon');
-        const closeIcon = document.getElementById('hamburger-close-icon');
+        const hamburgerClose = document.getElementById('hamburger-close-icon');
+        const sidebarOpen = document.getElementById('sidebar-open-icon');
+        const sidebarClose = document.getElementById('sidebar-close-icon');
         if (!panel || !backdrop) return;
 
         panel.classList.remove('open');
         backdrop.classList.add('opacity-0', 'pointer-events-none');
         if (hamburgerIcon) hamburgerIcon.classList.remove('hidden');
-        if (closeIcon) closeIcon.classList.add('hidden');
+        if (hamburgerClose) hamburgerClose.classList.add('hidden');
+        if (sidebarOpen) sidebarOpen.classList.remove('hidden');
+        if (sidebarClose) sidebarClose.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
     }
 

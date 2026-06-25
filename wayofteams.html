@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Way of Teams — CTO Dashboard and AI Engineering Harness built on Phoenix, Ash Framework, and Jido agents.">
+    <meta name="keywords" content="Way of Teams, CTO Dashboard, AI Engineering Harness, Phoenix, Ash Framework, Jido, OpenTelemetry">
+    <meta name="author" content="WayOfMono Engineering">
+    <meta property="og:title" content="Way of Teams — CTO Dashboard & AI Engineering Harness">
+    <meta property="og:description" content="CTO Dashboard and AI Engineering Harness built on Phoenix, Ash Framework, and Jido agents.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://onboard.wayofmono.com/wayofteams.html">
+    <meta property="og:image" content="/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Way of Teams — WayOfMono Onboarding">
+    <meta name="twitter:description" content="CTO Dashboard and AI Engineering Harness.">
+    <meta name="twitter:image" content="/og-image.svg">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.svg">
+    <title>Way of Teams — CTO Dashboard & AI Engineering Harness</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#115e59',
+                            DEFAULT: '#14b8a6'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #09090b; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.03); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(20, 184, 166, 0.5); }
+        .glow-accent { box-shadow: 0 0 20px rgba(20, 184, 166, 0.15); }
+    </style>
+</head>
+<body class="text-zinc-100 bg-zinc-950 min-h-screen flex flex-col overflow-x-hidden antialiased custom-scrollbar">
+
+    <!-- Markdown Viewer Modal -->
+    <div id="md-viewer" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b border-zinc-800">
+                <h3 id="md-viewer-title" class="text-sm font-bold text-white flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+                    <span id="md-viewer-title-text">Document</span>
+                </h3>
+                <button onclick="closeMarkdownViewer()" class="p-1.5 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white transition-all">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="md-viewer-content" class="flex-1 overflow-y-auto p-6 custom-scrollbar prose prose-invert prose-sm max-w-none">
+                <div class="text-zinc-400 text-sm">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 bg-zinc-900 border border-brand-500/30 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm">
+        <div class="p-1 rounded-full bg-brand-500/20 text-brand-400">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        <span id="toast-message" class="text-sm font-medium">Copied!</span>
+    </div>
+
+    <!-- Top App Bar -->
+    <header class="border-b border-zinc-800/80 bg-zinc-900/60 backdrop-blur-md sticky top-0 z-40 px-4 py-3 sm:px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="p-2 bg-brand/10 border border-brand/20 rounded-xl text-brand hover:bg-brand/20 transition-all">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+                        WayOfMono Onboarding Center
+                        <button id="hamburger-btn" class="lg:hidden p-1.5 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white" title="Toggle Side Panel" onclick="toggleMobilePanel()">
+                            <svg id="hamburger-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                            <svg id="hamburger-close-icon" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </h1>
+                    <p class="text-xs text-zinc-400">Local GitHub Setup, WayOfMono, & Zed IDE Integration</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 flex-wrap md:justify-end w-full md:w-auto">
+                <div class="flex flex-wrap bg-zinc-950 p-1 rounded-lg border border-zinc-800 gap-px">
+                    <a href="index.html" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all">Dashboard</a>
+                    <a href="presentation.html" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-all">Presentation</a>
+                    <a href="wayofteams.html" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium bg-brand text-zinc-950 shadow-sm transition-all flex items-center gap-1">
+                        <svg class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Teams
+                    </a>
+                    <a href="tickets.html" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-brand/10 transition-all flex items-center gap-1">
+                        <svg class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Tickets
+                    </a>
+                    <a href="skills.html" class="px-1.5 sm:px-3 py-1 rounded text-[9px] sm:text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-brand/10 transition-all flex items-center gap-1">
+                        <svg class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                        Skills
+                    </a>
+                </div>
+
+                <div class="relative" id="resources-dropdown">
+                    <button id="resources-btn" class="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-300 hover:text-white flex items-center gap-1.5" title="Resources" onclick="toggleResourcesDropdown()">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                        <span class="hidden sm:inline">Resources</span>
+                        <svg id="resources-chevron" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <div id="resources-menu" class="hidden absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-50">
+                        <div class="p-2 space-y-1">
+                            <a href="tickets.html" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                Ticket System
+                            </a>
+                            <a href="skills.html" class="block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                AI Harness Skills
+                            </a>
+                            <hr class="border-zinc-800 my-1">
+                            <button onclick="renderMarkdown('info/f-rr-d.md', 'f-rr-d (förråd) — Centralized Thoughts'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+                                f-rr-d (Centralized Thoughts)
+                            </button>
+                            <button onclick="renderMarkdown('info/wayofwork.md', 'Way of Work'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                Way of Work
+                            </button>
+                            <button onclick="renderMarkdown('info/OptiCat.md', 'OptiCat'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                OptiCat
+                            </button>
+                            <button onclick="renderMarkdown('info/wayofmono.md', 'WayOfMono'); closeResourcesDropdown();" class="w-full text-left block px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg flex items-center gap-2">
+                                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                WayOfMono
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-8">
+
+        <!-- Page Header -->
+        <div class="bg-gradient-to-br from-zinc-900/60 to-zinc-950 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-brand/10 border border-brand/20 rounded-xl text-brand">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-white">Way of Teams</h2>
+                    <p class="text-xs text-zinc-400">CTO Dashboard & AI Engineering Harness — Phoenix port</p>
+                </div>
+            </div>
+            <p class="text-sm text-zinc-300 leading-relaxed">
+                Way of Teams is a CTO Dashboard and AI Engineering Harness built on <strong class="text-white">Phoenix</strong>, <strong class="text-white">Ash Framework</strong>, and <strong class="text-white">Jido agents</strong>. It replaces fragmented engineering management tools with a single, unified platform that combines tickets, standups, skills tracking, notifications, ideas, news, agent workflows, and observability — all in one real-time dashboard.
+            </p>
+        </div>
+
+        <!-- Tech Stack & Quick Start -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+                <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                    Tech Stack
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-[10px] text-zinc-500 uppercase tracking-wider">Web</p>
+                        <p class="text-sm font-bold text-white">Phoenix 1.8</p>
+                        <p class="text-[10px] text-zinc-400">LiveView 1.2 + Bandit 1.5</p>
+                    </div>
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-[10px] text-zinc-500 uppercase tracking-wider">Data</p>
+                        <p class="text-sm font-bold text-white">Ash 3.29</p>
+                        <p class="text-[10px] text-zinc-400">AshPostgres 2.10</p>
+                    </div>
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-[10px] text-zinc-500 uppercase tracking-wider">Agents</p>
+                        <p class="text-sm font-bold text-white">Jido 2.3</p>
+                        <p class="text-[10px] text-zinc-400">Actions + Signals</p>
+                    </div>
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-[10px] text-zinc-500 uppercase tracking-wider">Database</p>
+                        <p class="text-sm font-bold text-white">PostgreSQL 16</p>
+                    </div>
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-[10px] text-zinc-500 uppercase tracking-wider">Observability</p>
+                        <p class="text-sm font-bold text-white">OpenTelemetry 1.5</p>
+                    </div>
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-[10px] text-zinc-500 uppercase tracking-wider">Auth</p>
+                        <p class="text-sm font-bold text-white">AshAuth 4.0</p>
+                        <p class="text-[10px] text-zinc-400">GitHub OAuth</p>
+                    </div>
+                </div>
+
+                <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mt-6 mb-3 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    Quick Start
+                </h3>
+                <div class="space-y-2">
+                    <div class="bg-zinc-950 rounded-lg p-3 border border-zinc-800">
+                        <code class="text-sm text-emerald-400 font-mono">mix setup</code>
+                        <span class="text-xs text-zinc-500 ml-2">Get deps, create DB, migrate, seed</span>
+                    </div>
+                    <div class="bg-zinc-950 rounded-lg p-3 border border-zinc-800">
+                        <code class="text-sm text-emerald-400 font-mono">mix phx.server</code>
+                        <span class="text-xs text-zinc-500 ml-2">Start dev server at localhost:4000</span>
+                    </div>
+                    <div class="bg-zinc-950 rounded-lg p-3 border border-zinc-800">
+                        <code class="text-sm text-emerald-400 font-mono">mix test</code>
+                        <span class="text-xs text-zinc-500 ml-2">Run ExUnit tests</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+                <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    Ash Domains
+                </h3>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <span class="text-xs font-mono text-zinc-300">Wayofdev.Tickets</span>
+                        <span class="text-[10px] text-zinc-500">Ticket, Status</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <span class="text-xs font-mono text-zinc-300">Wayofdev.Accounts</span>
+                        <span class="text-[10px] text-zinc-500">Developer</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <span class="text-xs font-mono text-zinc-300">Wayofdev.Skills</span>
+                        <span class="text-[10px] text-zinc-500">Skill, Manifest</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <span class="text-xs font-mono text-zinc-300">Wayofdev.Standups</span>
+                        <span class="text-[10px] text-zinc-500">Standup</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <span class="text-xs font-mono text-zinc-300">Wayofdev.Notifications</span>
+                        <span class="text-[10px] text-zinc-500">Notification</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <span class="text-xs font-mono text-zinc-300">Wayofdev.Insights</span>
+                        <span class="text-[10px] text-zinc-500">SkillReport</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architecture -->
+        <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+            <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                Architecture
+            </h3>
+            <div class="p-5 bg-zinc-950 rounded-xl border border-zinc-800 font-mono text-xs text-zinc-300 leading-relaxed mb-4">
+                <div class="text-brand font-bold mb-2">Web Layer</div>
+                <div class="pl-4 text-zinc-400">LiveView SPA — 14 views</div>
+                <div class="text-zinc-500 my-1">│</div>
+                <div class="text-zinc-400">▼</div>
+                <div class="text-brand font-bold mt-2 mb-2">Business Logic</div>
+                <div class="pl-4 text-zinc-400">6 Ash Domains (Tickets, Accounts, Skills, Standups, Notifications, Insights)</div>
+                <div class="text-zinc-500 my-1">│</div>
+                <div class="text-zinc-400">▼</div>
+                <div class="text-brand font-bold mt-2 mb-2">Agent Layer</div>
+                <div class="pl-4 text-zinc-400">Jido 2.3 — TicketManagerAgent, SkillAutoUpdateAgent</div>
+                <div class="text-zinc-500 my-1">│</div>
+                <div class="text-zinc-400">▼</div>
+                <div class="text-brand font-bold mt-2 mb-2">Data Layer</div>
+                <div class="pl-4 text-zinc-400">AshPostgres + PostgreSQL 16</div>
+                <div class="text-zinc-500 my-1">│</div>
+                <div class="text-zinc-400">▼</div>
+                <div class="text-brand font-bold mt-2 mb-2">Observability</div>
+                <div class="pl-4 text-zinc-400">OpenTelemetry 1.5 — across all layers</div>
+            </div>
+        </div>
+
+        <!-- LiveView Pages -->
+        <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+            <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                LiveView Pages
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <p class="text-sm font-bold text-white">/dashboard</p>
+                    <p class="text-xs text-zinc-400">CTO command center with real-time metrics, team velocity, review queue, system health</p>
+                </div>
+                <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <p class="text-sm font-bold text-white">/tickets</p>
+                    <p class="text-xs text-zinc-400">Ticket list with filters, bulk ops, sync trigger</p>
+                </div>
+                <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <p class="text-sm font-bold text-white">/standups</p>
+                    <p class="text-xs text-zinc-400">Developer standups</p>
+                </div>
+                <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <p class="text-sm font-bold text-white">/skills</p>
+                    <p class="text-xs text-zinc-400">Skills inventory</p>
+                </div>
+                <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <p class="text-sm font-bold text-white">/notifications</p>
+                    <p class="text-xs text-zinc-400">Notifications feed</p>
+                </div>
+                <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <p class="text-sm font-bold text-white">/review-queue</p>
+                    <p class="text-xs text-zinc-400">Review queue for CTO</p>
+                </div>
+                <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <p class="text-sm font-bold text-white">/developers</p>
+                    <p class="text-xs text-zinc-400">Kanban board filtered by developer</p>
+                </div>
+                <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <p class="text-sm font-bold text-white">/my-view</p>
+                    <p class="text-xs text-zinc-400">Per-developer ticket list + standups</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ticket Sync Architecture -->
+        <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+            <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                Ticket Sync Pipeline
+            </h3>
+            <p class="text-xs text-zinc-400 mb-4">Tickets flow from <code class="text-brand font-mono text-xs">thoughts/</code> (f-rr-d) → PostgreSQL → LiveView UI</p>
+
+            <div class="p-5 bg-zinc-950 rounded-xl border border-zinc-800 font-mono text-[11px] text-zinc-300 leading-relaxed mb-4 overflow-x-auto">
+                <div class="text-zinc-400">thoughts/&lt;project&gt;/shared/tickets/&lt;PREFIX&gt;-NNN-DESC.md</div>
+                <div class="text-zinc-600">  │</div>
+                <div class="text-zinc-600">  ▼  (1) Sync.run() — git pull f-rr-d</div>
+                <div class="text-zinc-600">  │</div>
+                <div class="text-zinc-600">  ▼  (2) parse_frontmatter() — extract YAML</div>
+                <div class="text-zinc-600">  │</div>
+                <div class="text-zinc-600">  ▼  (3) upsert_ticket() — Ash upsert</div>
+                <div class="text-zinc-600">  │</div>
+                <div class="text-zinc-500">  ├──────┐</div>
+                <div class="text-zinc-500">  ▼      ▼</div>
+                <div class="text-emerald-400">PostgreSQL    Notification</div>
+                <div class="text-emerald-400">tickets DB    "Sync Complete"</div>
+                <div class="text-zinc-600">  │</div>
+                <div class="text-zinc-600">  ▼  (4) LiveViews via Ash.read!</div>
+                <div class="text-zinc-600">  │</div>
+                <div class="text-zinc-500">  ├──────┬──────────┬──────────┐</div>
+                <div class="text-zinc-500">  ▼      ▼          ▼          ▼</div>
+                <div class="text-zinc-300">Dashboard  Tickets    MyView   Developers</div>
+            </div>
+
+            <h4 class="text-xs font-bold text-zinc-300 mb-3 mt-6 uppercase tracking-wide">Projects Synced</h4>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                    <span class="px-1.5 py-0.5 rounded bg-brand/10 text-brand font-mono font-bold">WOMONO</span>
+                    <span class="text-zinc-400">wayofmono</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                    <span class="px-1.5 py-0.5 rounded bg-blue-400/10 text-blue-400 font-mono font-bold">WOW</span>
+                    <span class="text-zinc-400">wow</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                    <span class="px-1.5 py-0.5 rounded bg-purple-400/10 text-purple-400 font-mono font-bold">WOC</span>
+                    <span class="text-zinc-400">woc</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                    <span class="px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-400 font-mono font-bold">OPT</span>
+                    <span class="text-zinc-400">opticat</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                    <span class="px-1.5 py-0.5 rounded bg-rose-400/10 text-rose-400 font-mono font-bold">OPTSITE</span>
+                    <span class="text-zinc-400">opticatsite</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                    <span class="px-1.5 py-0.5 rounded bg-teal-400/10 text-teal-400 font-mono font-bold">WOTEAMS</span>
+                    <span class="text-zinc-400">wayofteams</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                    <span class="px-1.5 py-0.5 rounded bg-zinc-500/20 text-zinc-400 font-mono font-bold">GLOBAL</span>
+                    <span class="text-zinc-400">global</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Component Reference -->
+        <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+            <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+                Component Reference
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead>
+                        <tr class="text-zinc-500 uppercase tracking-wider border-b border-zinc-800">
+                            <th class="text-left py-2 pr-4 font-bold">Layer</th>
+                            <th class="text-left py-2 pr-4 font-bold">File</th>
+                            <th class="text-left py-2 font-bold">Role</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-zinc-300">
+                        <tr class="border-b border-zinc-800/50">
+                            <td class="py-2 pr-4 font-mono text-brand">Markdown</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">thoughts/&lt;project&gt;/shared/tickets/</td>
+                            <td class="py-2">Authoritative ticket data (frontmatter + body)</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800/50">
+                            <td class="py-2 pr-4 font-mono text-brand">Sync</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">lib/wayofteams/tickets/sync.ex</td>
+                            <td class="py-2">Pull f-rr-d, parse frontmatter, upsert to DB</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800/50">
+                            <td class="py-2 pr-4 font-mono text-brand">DB</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">lib/wayofteams/tickets/ticket.ex</td>
+                            <td class="py-2">Ash Resource defining tickets table</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800/50">
+                            <td class="py-2 pr-4 font-mono text-brand">Status</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">lib/wayofteams/tickets/status.ex</td>
+                            <td class="py-2">Lookup table: id → name + color</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800/50">
+                            <td class="py-2 pr-4 font-mono text-brand">List UI</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">live/tickets_live.ex</td>
+                            <td class="py-2">Table with filters, bulk ops, sync trigger</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800/50">
+                            <td class="py-2 pr-4 font-mono text-brand">Detail UI</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">live/ticket_detail_live.ex</td>
+                            <td class="py-2">Single ticket view + edit</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800/50">
+                            <td class="py-2 pr-4 font-mono text-brand">Dashboard</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">live/dashboard_live.ex</td>
+                            <td class="py-2">Summary stat cards, recent tickets</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800/50">
+                            <td class="py-2 pr-4 font-mono text-brand">My View</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">live/my_view_live.ex</td>
+                            <td class="py-2">Per-developer ticket list + standups</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800/50">
+                            <td class="py-2 pr-4 font-mono text-brand">Kanban</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">live/developers_live.ex</td>
+                            <td class="py-2">Kanban board filtered by developer</td>
+                        </tr>
+                        <tr class="border-b border-zinc-800/50">
+                            <td class="py-2 pr-4 font-mono text-brand">Review</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">live/review_queue_live.ex</td>
+                            <td class="py-2">Tickets in review status</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 pr-4 font-mono text-brand">Create UI</td>
+                            <td class="py-2 pr-4 font-mono text-[10px]">live/ticket_form_live.ex</td>
+                            <td class="py-2">New ticket form (writes directly to DB)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+            <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                Features
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <h4 class="text-sm font-bold text-white mb-1">Tickets</h4>
+                    <p class="text-xs text-zinc-400">Full ticket management with Ash resource lifecycle, status tracking, and GitHub integration. Synced from markdown files in f-rr-d.</p>
+                </div>
+                <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <h4 class="text-sm font-bold text-white mb-1">Standups</h4>
+                    <p class="text-xs text-zinc-400">Async standup management with per-developer daily updates aggregated into team view.</p>
+                </div>
+                <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <h4 class="text-sm font-bold text-white mb-1">Skills & Insights</h4>
+                    <p class="text-xs text-zinc-400">Skill matrix tracking with manifest system and automated SkillReport generation.</p>
+                </div>
+                <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <h4 class="text-sm font-bold text-white mb-1">Agent Workflows</h4>
+                    <p class="text-xs text-zinc-400">Jido-powered AI agents for automated signal processing, notifications, and workflow orchestration.</p>
+                </div>
+                <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <h4 class="text-sm font-bold text-white mb-1">Ideas & News</h4>
+                    <p class="text-xs text-zinc-400">Collaborative idea board and engineering news feed with Ash resources.</p>
+                </div>
+                <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <h4 class="text-sm font-bold text-white mb-1">Observability</h4>
+                    <p class="text-xs text-zinc-400">Full OpenTelemetry instrumentation across all layers — link team activity to system health.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tools -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+                <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                    Jido Agents
+                </h3>
+                <div class="space-y-2">
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-sm font-bold text-white">TicketManagerAgent</p>
+                        <p class="text-xs text-zinc-400">Ticket lifecycle management</p>
+                    </div>
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-sm font-bold text-white">SkillAutoUpdateAgent</p>
+                        <p class="text-xs text-zinc-400">Auto-discover and sync skills</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+                <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                    Market & Business
+                </h3>
+                <div class="space-y-2">
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-xs text-zinc-400"><strong class="text-white">Target:</strong> Engineering teams of 10-100 developers</p>
+                    </div>
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-xs text-zinc-400"><strong class="text-white">Licensing:</strong> Proprietary — Way of Teams is a WAY OF tool (internal platform)</p>
+                    </div>
+                    <div class="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
+                        <p class="text-xs text-zinc-400"><strong class="text-white">Investment:</strong> Seeking $750K at $4M pre-money valuation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Links -->
+        <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-xl">
+            <h3 class="text-xs font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                Links
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <a href="https://github.com/zerwiz/wayofteams" target="_blank" class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-brand/40 hover:bg-zinc-900 transition-all flex items-center justify-between group">
+                    <div>
+                        <span class="text-xs font-bold text-white font-mono">GitHub</span>
+                        <p class="text-[10px] text-zinc-500">zerwiz/wayofteams</p>
+                    </div>
+                    <svg class="w-4 h-4 text-zinc-600 group-hover:text-brand transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+                <a href="https://github.com/Way-Of/f-rr-d" target="_blank" class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-brand/40 hover:bg-zinc-900 transition-all flex items-center justify-between group">
+                    <div>
+                        <span class="text-xs font-bold text-white font-mono">f-rr-d</span>
+                        <p class="text-[10px] text-zinc-500">Centralized Thoughts</p>
+                    </div>
+                    <svg class="w-4 h-4 text-zinc-600 group-hover:text-brand transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+                <a href="https://github.com/Way-Of/wayofmono" target="_blank" class="p-3 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-brand/40 hover:bg-zinc-900 transition-all flex items-center justify-between group">
+                    <div>
+                        <span class="text-xs font-bold text-white font-mono">ai-harness</span>
+                        <p class="text-[10px] text-zinc-500">WayOfMono Monorepo</p>
+                    </div>
+                    <svg class="w-4 h-4 text-zinc-600 group-hover:text-brand transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const toastTimeout = { id: null };
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            t.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
+            clearTimeout(toastTimeout.id);
+            toastTimeout.id = setTimeout(() => t.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none'), 2500);
+        }
+        function copyCommand(cmd, msg) {
+            navigator.clipboard.writeText(cmd).then(() => showToast(msg || 'Copied!')).catch(() => {});
+        }
+        function closeMarkdownViewer() {
+            document.getElementById('md-viewer').classList.add('hidden');
+            document.getElementById('md-viewer').classList.remove('flex');
+        }
+        function toggleResourcesDropdown() {
+            const menu = document.getElementById('resources-menu');
+            const chevron = document.getElementById('resources-chevron');
+            menu.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
+        }
+        function closeResourcesDropdown() {
+            const menu = document.getElementById('resources-menu');
+            const chevron = document.getElementById('resources-chevron');
+            if (menu) menu.classList.add('hidden');
+            if (chevron) chevron.classList.remove('rotate-180');
+        }
+        function renderMarkdown(file, title) {
+            const viewer = document.getElementById('md-viewer');
+            const content = document.getElementById('md-viewer-content');
+            const titleText = document.getElementById('md-viewer-title-text');
+            titleText.textContent = title || 'Document';
+            content.innerHTML = '<div class="text-zinc-400 text-sm">Loading...</div>';
+            viewer.classList.remove('hidden');
+            viewer.classList.add('flex');
+            fetch(file).then(r => r.text()).then(md => {
+                content.innerHTML = marked.parse(md);
+            }).catch(() => {
+                content.innerHTML = '<div class="text-red-400 text-sm">Failed to load document.</div>';
+            });
+        }
+        document.addEventListener('click', function(e) {
+            const dd = document.getElementById('resources-dropdown');
+            if (dd && !dd.contains(e.target)) {
+                const menu = document.getElementById('resources-menu');
+                const chevron = document.getElementById('resources-chevron');
+                if (menu) menu.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+            }
+        });
+    </script>
+</body>
+</html>

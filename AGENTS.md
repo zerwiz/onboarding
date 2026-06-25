@@ -21,6 +21,7 @@ npm run dev          # Starts npx serve on port 3000
 ```
 onboard/
 ├── index.html              # Main app (692 lines, uses src/app.js module)
+├── wayofteams.html          # Way of Teams project page
 ├── tickets.html            # Ticket system documentation (874 lines)
 ├── skills.html             # All 80 AI Harness skills reference (554 lines)
 ├── src/
@@ -58,7 +59,8 @@ onboard/
 │   ├── f-rr-d.md
 │   ├── wayofwork.md
 │   ├── OptiCat.md
-│   └── wayofmono.md
+│   ├── wayofmono.md
+│   └── wayofteams.md
 ```
 
 ## Key Features

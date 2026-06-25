@@ -32,6 +32,9 @@ Before doing anything on your computer, you must accept access to our primary re
    * **WayOfMono — AI Engineering Monorepo:** https://github.com/Way-Of/wayofmono
      Monorepo consolidation for 7 AI coding agents. 51k+ files, 906 SKILL.md files, 13 npm packages. Provides the ai-harness CLI and shared Intelligence Backend.
 
+   * **Way of Teams — CTO Dashboard & AI Harness:** https://github.com/zerwiz/wayofteams
+     CTO Dashboard and AI Engineering Harness built on Phoenix, Ash Framework, and Jido agents. Tickets, standups, skills, notifications, and agent workflows.
+
   3. On each page, look for a green banner at the top asking you to accept the invitation. Click **Accept**.
 
 ## Step 3: Create Your "Projects" Folder
@@ -244,7 +247,7 @@ This will automatically configure folders in your home directory, preparing them
 
 Now that our environment and coding agents are fully installed, we can download our project files.
 
-> ⚠️ **CRITICAL RULE:** Each repository must be cloned as its **own individual folder** directly inside the Projects workspace directory (e.g., Projects/wayofwork, Projects/OptiCat, and Projects/wayofmono). Do **not** nest them inside one another or combine their files into a single shared folder.
+> ⚠️ **CRITICAL RULE:** Each repository must be cloned as its **own individual folder** directly inside the Projects workspace directory (e.g., Projects/wayofwork, Projects/OptiCat, Projects/wayofmono, and Projects/wayofteams). Do **not** nest them inside one another or combine their files into a single shared folder.
 
 > 
 
@@ -264,7 +267,7 @@ You can choose to automate this using our opencode AI agent or do it manually.
 
  2. Once the opencode prompt starts, tell it to clone each repository into its own respective folder inside Projects by typing:
 
-   > *"Clone each of our project repositories into its own separate folder inside this Projects directory: clone https://github.com/Way-Of/wayofwork.git, https://github.com/Way-Of/OptiCat.git, and https://github.com/Way-Of/wayofmono.git"*
+   > *"Clone each of our project repositories into its own separate folder inside this Projects directory: clone https://github.com/Way-Of/wayofwork.git, https://github.com/Way-Of/OptiCat.git, https://github.com/Way-Of/wayofmono.git, and https://github.com/zerwiz/wayofteams.git"*
 
    > 
 
@@ -282,6 +285,7 @@ git clone [https://github.com/Way-Of/OptiCat.git](https://github.com/Way-Of/Opti
 
 git clone [https://github.com/Way-Of/wayofmono.git](https://github.com/Way-Of/wayofmono.git)
 
+git clone [https://github.com/zerwiz/wayofteams.git](https://github.com/zerwiz/wayofteams.git)
 
 
 ```
@@ -396,7 +400,31 @@ Once inside opencode, run:
 
 ```
 
-*(When prompted for Project Name, enter WayOfMono. For the project slug, enter wayofmono).*
+ *(When prompted for Project Name, enter WayOfMono. For the project slug, enter wayofmono).*
+
+#### 4. Set up the wayofteams workspace:
+
+```bash
+
+cd ~/Projects/wayofteams
+
+opencode
+
+
+
+```
+
+Once inside opencode, run:
+
+```text
+
+/init-harness
+
+
+
+```
+
+ *(When prompted for Project Name, enter WayOfTeams. For the project slug, enter wayofteams).*
 
 ## Step 9: Critical Rules for the Centralized "thoughts/" Folder
 
@@ -502,13 +530,21 @@ Projects/
 
 │       └── opticat/            # OptiCat Platform Workspace (OPT-XXX tickets)
 
-└── wayofmono/                  # The cloned 'wayofmono' monorepo
+├── wayofmono/                  # The cloned 'wayofmono' monorepo
 
-    ├── .gitignore              # Configured to ignore "thoughts/"
+│   ├── .gitignore              # Configured to ignore "thoughts/"
+
+│   └── thoughts/               # Standing clone of 'f-rr-d'
+
+│       └── wayofmono/          # WayOfMono Platform Workspace (WOMONO-XXX tickets)
+
+└── wayofteams/                 # The cloned 'wayofteams' repository
+
+    ├── .gitignore              # Configured to ignore "thoughts/" + "onboarding/"
 
     └── thoughts/               # Standing clone of 'f-rr-d'
 
-        └── wayofmono/          # WayOfMono Platform Workspace (WOMONO-XXX tickets)
+        └── wayofteams/         # Way of Teams Platform Workspace (WOTEAMS-XXX tickets)
 
 
 

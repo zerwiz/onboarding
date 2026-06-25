@@ -8,7 +8,7 @@ const slides = [
                     Welcome to the team! This onboarding guide will walk you through configuring local GitHub credentialing, repository access, the Engineering AI Harness, and Zed IDE integration.
                 </p>
                 <div class="p-4 bg-brand/10 border border-brand/20 rounded-xl text-sm text-zinc-300">
-                    <strong class="text-white block mb-1">Pro Tip:</strong> This portal supports two modes (selectable from the top bar): <strong>Dashboard</strong> (full workspace overview) and <strong>Presentation</strong> (focused step-by-step). Use arrow keys or the buttons below to navigate slides. Bookmark this page for future reference.
+                    <strong class="text-white block mb-1">Pro Tip:</strong> Use the header nav to switch between <strong>Dashboard</strong> (full workspace overview on index.html) and <strong>Presentation</strong> (focused step-by-step on presentation.html). Use arrow keys or the buttons below to navigate slides. Bookmark this page for future reference.
                 </div>
             </div>
         `
@@ -47,6 +47,10 @@ const slides = [
                     <div class="flex items-center gap-3 p-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs">
                         <span class="px-2 py-0.5 rounded bg-brand/10 text-brand font-mono font-bold">wayofmono</span>
                         <span class="text-zinc-400">WayOfMono meta-repository</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs">
+                        <span class="px-2 py-0.5 rounded bg-brand/10 text-brand font-mono font-bold">wayofteams</span>
+                        <span class="text-zinc-400">CTO Dashboard & AI Harness</span>
                     </div>
                 </div>
                 <div class="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs rounded-xl">
@@ -216,6 +220,10 @@ const slides = [
                             <code>cd ~/Projects && git clone git@github.com:Way-Of/wayofmono.git</code>
                             <button class="text-[10px] text-brand" onclick="copyCommand('cd ~/Projects && git clone git@github.com:Way-Of/wayofmono.git', 'wayofmono clone copied!')">Copy</button>
                         </div>
+                        <div class="bg-zinc-900 rounded p-2 border border-zinc-800 flex items-center justify-between">
+                            <code>cd ~/Projects && git clone git@github.com:zerwiz/wayofteams.git</code>
+                            <button class="text-[10px] text-brand" onclick="copyCommand('cd ~/Projects && git clone git@github.com:zerwiz/wayofteams.git', 'wayofteams clone copied!')">Copy</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -282,6 +290,14 @@ const slides = [
                             <button class="text-[10px] text-brand" onclick="copyCommand('cd ~/Projects/wayofmono\nopencode', 'wayofmono startup copied!')">Copy</button>
                         </div>
                         <p class="text-[10px] text-zinc-500 mt-1">Once inside, run: <code class="text-brand">/init-harness</code>. Enter name <code class="text-zinc-300">WayOfMono</code> (slug: <code class="text-zinc-300">wayofmono</code>).</p>
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-bold text-zinc-400">4. Set up wayofteams Workspace</p>
+                        <div class="bg-zinc-900 rounded p-2 font-mono text-[11px] text-zinc-300 flex items-center justify-between">
+                            <code>cd ~/Projects/wayofteams && opencode</code>
+                            <button class="text-[10px] text-brand" onclick="copyCommand('cd ~/Projects/wayofteams\nopencode', 'wayofteams startup copied!')">Copy</button>
+                        </div>
+                        <p class="text-[10px] text-zinc-500 mt-1">Once inside, run: <code class="text-brand">/init-harness</code>. Enter name <code class="text-zinc-300">WayOfTeams</code> (slug: <code class="text-zinc-300">wayofteams</code>).</p>
                     </div>
                 </div>
             </div>

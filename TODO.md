@@ -2,6 +2,7 @@
 
 ## Completed
 
+### Core Features
 - [x] Create index.html with onboarding guide
 - [x] Set up Netlify config (netlify.toml)
 - [x] Create dev server script (start.sh, package.json)
@@ -20,9 +21,6 @@
 - [x] Add click-outside handler + ESC key for dropdown
 - [x] Add rotate-180 + transition-transform CSS classes
 - [x] Create tickets.html with ticket system documentation
-  - [x] ticket_context, ticket_executor, ticket_manager skill docs
-  - [x] Ticket naming conventions and storage paths
-  - [x] YouTube video embed + f-rr-d centralized storage link
 - [x] Add marked.js CDN for GitHub-flavored markdown rendering
 - [x] Create markdown viewer modal for info/*.md files
 - [x] Add repo-links-bar id for dashboard mode toggle
@@ -31,23 +29,52 @@
 - [x] Add deep linking for ticket system page (tickets.html#section)
 - [x] Fix mobile responsiveness of Ticket button
 - [x] Verify presentation/dashboard mode transitions
-- [x] Make Dashboard the default view (shows all info)
-- [x] Make Presentation mode focused on just the setup steps (larger text, cleaner layout)
+- [x] Make Dashboard the default view
+- [x] Make Presentation mode focused on setup steps
 - [x] Move Ticket System button next to Presentation/Dashboard buttons
-
-## Completed
-
-- [x] Explore wayofmono repo and document all skills in ai-harness packages
-- [x] Create skills reference page with all ai-harness skills (skills.html)
+- [x] Create skills reference page (skills.html) with all ai-harness skills
 - [x] Add Skills button next to Tickets button in header
 - [x] Add Skills link in Resources dropdown
+- [x] Verify Netlify deploy works (publish = ".", SPA redirects)
 
-## Architecture & Refactoring
-
+### Modular Refactoring (Phase 1-3)
 - [x] Create planning document for breaking index.html into modular components
-- [ ] Set up modular folder structure (components/, pages/, modals/, styles/, utils/)
-- [ ] Extract slide components into separate files
-- [ ] Extract sidebar widgets into separate components
-- [ ] Create shared layout/base template
-- [ ] Implement component loading system (ES modules or build step)
-- [ ] Migrate index.html to use modular structure
+- [x] Set up modular folder structure (components/, data/, utils/)
+- [x] Extract slides data into src/data/slides.js as ES module
+- [x] Create src/utils/helpers.js (copyCommand, escapeHtml, showToast, scrollToTop)
+- [x] Create src/utils/storage.js (localStorage wrapper)
+- [x] Create src/utils/search.js (search logic across slides/commands)
+- [x] Create src/components/Toast.js
+- [x] Create src/components/MarkdownViewer.js
+- [x] Create src/components/Header.js
+- [x] Create src/components/SlidePanel.js
+- [x] Create src/components/Sidebar.js
+- [x] Create src/components/NavigationMap.js
+- [x] Create src/components/ProgressBanner.js
+- [x] Create src/components/VideoSection.js
+- [x] Create src/components/MobileDrawer.js
+- [x] Create src/components/ViewMode.js
+- [x] Create src/app.js main entry point
+- [x] Wire up index.html with `<script type="module" src="src/app.js"></script>`
+- [x] index.html reduced from 1808 to 692 lines
+
+## In Progress
+
+### Meta & Assets
+- [ ] Add SEO meta tags to all pages (description, keywords, author)
+- [ ] Add Open Graph (OG) meta tags for social sharing
+- [ ] Add Twitter Card meta tags
+- [ ] Create OG image (1200×630 PNG)
+- [ ] Create favicon (SVG or PNG, 16×16 / 32×32)
+- [ ] Create apple-touch-icon (180×180 PNG)
+- [ ] Add dark mode persistence in localStorage
+
+### Module Extraction (tickets.html, skills.html)
+- [ ] Extract inline scripts from tickets.html into shared modules
+- [ ] Extract inline scripts from skills.html into shared modules
+- [ ] Verify all three pages work identically after extraction
+
+## Backlog
+- [ ] Add unit tests for utility functions
+- [ ] Add keyboard shortcut hints overlay
+- [ ] Add page transition animations
